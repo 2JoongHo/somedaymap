@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>언제갈지도 | SomedayMap</title>
+  <link rel="stylesheet" href="index.css" />
+  <!-- 🔑 카카오 지도 API 불러오기 -->
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=6769ff1e824932a4aba8297bb6eab4df&libraries=services"></script>
+  <script src="index.js"></script>
+</head>
+<body>
+  <header>
+    <h1>언제갈지도 🗺️</h1>
+  </header>
+
+  <main>
+    <div class="controls">
+      <input type="text" id="placeName" placeholder="가고 싶은 장소 이름 입력" />
+      <button id="addPlaceBtn">등록</button>
+    </div>
+    <div id="map"></div>
+  </main>
+
+  <footer>
+    <p>© 2025 언제갈지도 — Created by 멍순이</p>
+  </footer>
+</body>
+</html>

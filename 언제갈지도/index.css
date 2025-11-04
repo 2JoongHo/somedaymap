@@ -13,6 +13,12 @@ body {
     font-size: 1.5rem;
     font-weight: bold;
   }
+
+  header h1 img {
+    width: 70px;
+    height: 70px;
+    vertical-align: middle;
+  }
   
   .controls {
     display: flex;

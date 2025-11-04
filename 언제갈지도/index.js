@@ -3,10 +3,10 @@ window.onload = function () {
     // 지도를 표시할 div
     const container = document.getElementById('map');
   
-    // 지도 옵션 (처음 위치는 서울)
+    // 지도 옵션 (망포역)
     const options = {
       center: new kakao.maps.LatLng(37.245833, 127.056667),
-      level: 4
+      level: 3
     };
   
     // 지도 생성

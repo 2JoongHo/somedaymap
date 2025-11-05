@@ -16,15 +16,17 @@
       <!-- <span>언제갈지도</span> -->
     </h1>
 
+    <!-- 우측 상단 메뉴창 -->
     <nav class="menu">
       <ul>
-        <li><button><img src="../src/assets/icon/placeIcon.svg" alt="내 장소"></button></li>
-        <li><button><img src="../src/assets/icon/loginIcon.svg" alt="로그인"></button></li>
-        <li><button><img src="../src/assets/icon/settingsIcon.svg" alt="설정"></button></li>
+        <li><button id="placeBtn"><img src="../src/assets/icon/placeIcon.svg" alt="내 장소"></button></li>
+        <li><button id="loginBtn"><img src="../src/assets/icon/loginIcon.svg" alt="로그인"></button></li>
+        <li><button id="settingsBtn"><img src="../src/assets/icon/settingsIcon.svg" alt="설정"></button></li>
       </ul>
     </nav>
   </header>
 
+  <!-- 장소 검색 -->
   <main>
     <div class="controls">
       <input type="text" id="placeName" placeholder="가고 싶은 장소 이름 입력" />
@@ -33,6 +35,18 @@
     <div id="map"></div>
   </main>
 
+  <!-- 내 장소 목록 모달 -->
+  <div id="placeModal" class="placeModal">
+    <div class="modal-content">
+      <h2>내 장소 목록</div>
+      <ul id="placeList">
+        <li>등록된 장소가 없습니다.</li>
+      </ul>
+      <button id="closeModal">닫기</button>
+    </div>
+  </div>
+
+  <!-- 화면 하단 -->
   <footer>
     <p>© 2025 언제갈지도 — Created by 멍순이</p>
   </footer>

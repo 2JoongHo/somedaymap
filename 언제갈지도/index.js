@@ -15,6 +15,11 @@ window.onload = function () {
     // 버튼 이벤트
     const addBtn = document.getElementById('addPlaceBtn');
     const placeInput = document.getElementById('placeName');
+    const placeBtn = document.getElementById('placeBtn');
+    const loginBtn = document.getElementById('loginBtn');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const placeModal = document.getElementById('placeModal');
+    const closeModal = document.getElementById('closeModal');
   
     addBtn.addEventListener('click', () => {
       const name = placeInput.value.trim();
@@ -35,6 +40,35 @@ window.onload = function () {
       infowindow.open(map, marker);
   
       placeInput.value = '';
+    });
+
+    // 내 장소 버튼 클릭 시
+    placeBtn.addEventListener('click', () => {
+      // this.alert("등록한 장소 목록을 불러옵니다.");
+      placeModal.style.display = 'flex';
+    });
+
+    // 로그인 버튼 클릭 시
+    loginBtn.addEventListener('click', () => {
+      this.alert("로그인 기능은 곧 추가됩니다.");
+      // 카카오/구글 로그인 연동 가능
+    });
+
+    // 설정 버튼 클릭 시
+    settingsBtn.addEventListener('click', () => {
+      this.alert("앱 설정창 열기");
+    });
+
+    // 배경 클릭 시 닫기
+    placeModal.addEventListener('click', (e) => {
+      if (e.target === placeModal) {
+        placeModal.style.display = 'none';
+      }
+    });
+
+    // 닫기 버튼 클릭 시 닫기
+    closeModal.addEventListener('click', () => {
+      placeModal.style.display = 'none';
     });
   };
   

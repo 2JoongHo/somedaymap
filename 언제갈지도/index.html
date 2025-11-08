@@ -6,7 +6,10 @@
   <title>언제갈지도 | SomedayMap</title>
   <link rel="stylesheet" href="index.css" />
   <!-- 🔑 카카오 지도 API 불러오기 -->
+  <!-- libraries=services는 장소 검색, 주소-좌표 변환 등을 위해 필요 -->
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=6769ff1e824932a4aba8297bb6eab4df&libraries=services"></script>
+  <!-- JavaScript 파일은 HTML Body 닫는 태그 바로 위에 두는 것이 DOM 로딩 완료를 기다리는 더 안정적인 방법이지만,
+       window.onload를 사용하면 head에서도 작동 가능 -->
   <script src="index.js"></script>
 </head>
 <body>
@@ -21,27 +24,32 @@
       <ul>
         <li><button id="placeBtn"><img src="../src/assets/icon/placeIcon.svg" alt="내 장소"></button></li>
         <li><button id="loginBtn"><img src="../src/assets/icon/loginIcon.svg" alt="로그인"></button></li>
-        <li><button id="settingsBtn"><img src="../src/assets/icon/settingsIcon.svg" alt="설정"></button></li>
+        <li><button id="settingsBtn"><img src="../src/assets/icon/settingsIcon.svg" alt="설정"></button>
+        </li>
       </ul>
     </nav>
   </header>
 
-  <!-- 장소 검색 -->
   <main>
-    <div class="controls">
+    <!-- 장소 검색 (현재 주석 처리되어 있습니다) -->
+    <!-- <div class="controls">
       <input type="text" id="placeName" placeholder="가고 싶은 장소 이름 입력" />
       <button id="addPlaceBtn">등록</button>
-    </div>
+    </div> -->
+    
+    <!-- 지도 표기 -->
     <div id="map"></div>
   </main>
 
   <!-- 내 장소 목록 모달 -->
   <div id="placeModal" class="placeModal">
     <div class="modal-content">
-      <h2>내 장소 목록</div>
+      <h2>내 장소 목록</h2> <!-- 닫는 태그가 추가되었습니다. -->
       <ul id="placeList">
+        <!-- JS에서 동적으로 채워질 예정 -->
         <li>등록된 장소가 없습니다.</li>
       </ul>
+      <!-- ✨✨✨ 닫기 버튼의 위치가 .modal-content 내부로 이동했습니다! ✨✨✨ -->
       <button id="closeModal">닫기</button>
     </div>
   </div>

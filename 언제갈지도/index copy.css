@@ -14,15 +14,15 @@
     color: #333;
   }
   
-  /* 언제갈지도 로고와 헤더 */
+  /* 언제갈지도 로고 */
   header {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 60px;
-    background-color: rgba(255, 255, 255, 0.4); /* 살짝 투명한 하양 */
-    color: orange;
+    background-color: rgba(75, 128, 249, 0.4); /* 살짝 투명한 블루 */
+    color: white;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -35,107 +35,90 @@
   }
   
   header h1 span {
-    font-size: 2rem; /* 로고 텍스트 크기 키우기 */
-    font-weight: 700;   /* 볼드 처리 */
-    color: orange;       /* 텍스트 색상을 주황색으로 */
-    line-height: 1;     /* 텍스트 줄 간격 조정 */
+    position: relative;
+    top: -2px;
   }
 
-  /* header h1 img {
+  header h1 img {
     width: 70px;
     height: 70px;
     vertical-align: middle;
-  } */
+  }
 
   header h1 {
-    /* display: flex;
+    display: flex;
     align-items: center;
     justify-content: flex-start;
     gap: 5px;
-    margin: 0; */
-    flex-grow: 1;
-    text-align: center;
+    margin: 0;
+  }
+
+  /* 우측 상단 메뉴창 */
+  .menu ul {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
     margin: 0;
     padding: 0;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: auto;
-    white-space: nowrap;
-    z-index: 99;
   }
 
-  /* 우측 상단 메뉴 */
-  .main-menu {
-  position: relative; /* 드롭다운 메뉴 위치 지정을 위해 */
-  z-index: 101;
+  .menu li {
+    display: flex;
+    align-items: center;
   }
-
-.menu-toggle-btn { /* 새로 추가된 메뉴 토글 버튼 스타일 */
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  transition: background-color 0.2s, transform 0.1s;
-  z-index: 101; /* 다른 메뉴 아이템 위에 표시 */
-}
-.menu-toggle-btn:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-}
-.menu-toggle-btn:active {
-  transform: scale(0.95);
-}
-.menu-toggle-btn img {
-  width: 50px; /* 아이콘 크기는 기존과 동일하게 */
-  height: 50px;
-}
-
-.menu-items { /* 드롭다운으로 나올 메뉴 리스트 스타일 */
-  display: none; /* 기본적으로 숨겨져 있음 */
-  position: absolute;
-  top: 70px; /* 헤더 높이(60px) + 여백(10px) = 70px 아래에 나타남 */
-  right: 10px; /* 오른쪽 끝에 정렬 */
-  background: rgba(255, 255, 255, 0.7); /* 살짝 투명한 흰색 배경 */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  list-style: none;
-  padding: 10px;
-  margin: 0;
-  z-index: 100; /* 헤더보다는 낮지만, 콘텐츠보다는 위에 */
-  min-width: 120px; /* 메뉴 패널의 최소 너비 */
-  text-align: right; /* 메뉴 아이템 버튼들을 오른쪽으로 정렬 */
-}
-
-.menu-items li {
-  padding: 5px 0;
-  display: block; /* 각 아이템을 세로로 정렬 */
-}
-
-.menu-items li button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 100%; /* 버튼이 li 너비를 꽉 채우도록 */
-  padding: 8px 10px;
-  border-radius: 8px;
-  transition: background-color 0.2s, transform 0.1s;
-  text-align: right; /* 버튼 안의 콘텐츠도 오른쪽으로 */
-}
-
-.menu-items li button:hover {
-  background-color: rgba(75, 128, 249, 0.1); /* 메뉴 아이템 호버 시 살짝 색상 변화 */
-}
-.menu-items li button:active {
-  transform: scale(0.98);
-}
-.menu-items li button img {
-  width: 30px; /* 드롭다운 메뉴 안 아이콘은 조금 작게 */
-  height: 30px;
-  vertical-align: middle; /* 아이콘과 텍스트가 있다면 중앙 정렬 */
-}
+  
+  .menu button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s, transform 0.1s;
+  }
+  
+  .menu button:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+  
+  .menu button:active {
+    transform: scale(0.95);
+  }
+  
+  .menu img {
+    width: 50px;
+    height: 50px;
+    /* filter: brightness(0) invert(1); 흰색 아이콘으로 표시 */
+  }
+  
+  /* 장소 검색 (현재 HTML에서 주석 처리되어 있습니다) */
+  /* .controls {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 1rem;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  #placeName {
+    width: 200px;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  
+  #addPlaceBtn {
+    background-color: #4b80f9;
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  #addPlaceBtn:hover {
+    background-color: #3a67d4;
+  } */
   
   /* 지도 표기 */
   #map {
@@ -190,6 +173,10 @@
     flex-direction: column;
     align-items: center; /* 모달 내부 요소들을 수평 중앙 정렬 */
   }
+
+/* ================================================================= */
+/* ✨✨✨ 모달 내부 콘텐츠 스타일링 (내 장소 목록) 시작 ✨✨✨ */
+/* ================================================================= */
 
 /* 모달 타이틀 */
 .modal-content h2 {

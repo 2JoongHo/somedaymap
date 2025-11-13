@@ -19,21 +19,22 @@
       <span>언제갈지도</span>
     </h1>
 
-    <!-- 우측 상단 메뉴창 -->
+    <!-- 상단 메뉴창 -->
     <nav class="main-menu">
       <button id="menuToggleButton" class="menu-toggle-btn">
-        <img src="../src/assets/icon/menuIcon.svg" alt="메뉴"> <!-- 햄버거 메뉴 아이콘 필요 -->
+        <img src="../src/assets/icon/menuIcon.svg" alt="메뉴">
       </button>
-      <ul id="mainMenu" class="menu-items"> <!-- 이 ul이 토글될 메뉴 리스트가 됨 -->
-        <!-- <li><button id="placeBtn"><img src="../src/assets/icon/placeIcon.svg" alt="내 장소"></button>내 장소</li>
-        <li><button id="loginBtn"><img src="../src/assets/icon/loginIcon.svg" alt="로그인"></button>로그인</li>
-        <li><button id="settingsBtn"><img src="../src/assets/icon/settingsIcon.svg" alt="설정"></button>설정</li> -->
-        <li><button id="placeBtn"></button>내 장소</li>
-        <li><button id="loginBtn"></button>로그인</li>
-        <li><button id="settingsBtn"></button>설정</li>
+      <ul id="mainMenu" class="menu-items">
+        <li><button id="placeBtn">내 장소</button></li>
+        <li><button id="loginBtn">로그인</button></li>
+        <li><button id="settingsBtn">설정</button></li>
       </ul>
   </nav>
   </header>
+
+  <button id="moveToCurrentLocationBtn" class="my-location-btn">
+    <img src="../src/assets/icon/locationIcon.svg" alt="내 위치로 이동">
+  </button>
 
   <main>
     <!-- 장소 검색 (현재 주석 처리되어 있습니다) -->
@@ -49,12 +50,11 @@
   <!-- 내 장소 목록 모달 -->
   <div id="placeModal" class="placeModal">
     <div class="modal-content">
-      <h2>내 장소 목록</h2> <!-- 닫는 태그가 추가되었습니다. -->
+      <h2>내 장소 목록</h2>
       <ul id="placeList">
         <!-- JS에서 동적으로 채워질 예정 -->
         <li>등록된 장소가 없습니다.</li>
       </ul>
-      <!-- ✨✨✨ 닫기 버튼의 위치가 .modal-content 내부로 이동했습니다! ✨✨✨ -->
       <button id="closeModal">닫기</button>
     </div>
   </div>

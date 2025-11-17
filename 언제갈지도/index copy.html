@@ -29,7 +29,7 @@
         <li><button id="loginBtn">로그인</button></li>
         <li><button id="settingsBtn">설정</button></li>
       </ul>
-    </nav>
+  </nav>
   </header>
 
   <button id="moveToCurrentLocationBtn" class="my-location-btn">
@@ -39,7 +39,7 @@
   <main>
     <!-- 장소 검색 -->
     <div id="search-container">
-        <input type="text" id="keyword" placeholder="장소 이름을 검색하세요." autocomplete="off">
+        <input type="text" id="keyword" placeholder="장소 이름을 검색하세요..." autocomplete="off">
         <button id="searchBtn">검색</button>
     </div>
     
@@ -52,39 +52,10 @@
     <div class="modal-content">
       <h2>내 장소 목록</h2>
       <ul id="placeList">
+        <!-- JS에서 동적으로 채워질 예정 -->
         <li>등록된 장소가 없습니다.</li>
       </ul>
       <button id="closeModal">닫기</button>
-    </div>
-  </div>
-
-  <!-- 앱 설정 모달 -->
-  <div id="settingsModal" class="placeModal">
-    <div class="modal-content">
-      <h2>앱 설정</h2>
-      <div class="settings-group">
-        <h3>지오펜싱 & 위치</h3>
-        <div class="setting-item">
-          <span>새 장소 기본 알림 반경</span>
-          <input type="number" id="defaultRadiusInput" value="1000" min="10" max="5000" step="10">m
-        </div>
-        <div class="setting-item">
-          <span>장소 진입 시 알림</span>
-          <label class="switch">
-            <input type="checkbox" id="notifyOnEnterToggle" checked>
-            <span class="slider round"></span>
-          </label>
-        </div>
-        <div class="setting-item">
-          <span>장소 이탈 시 알림</span>
-          <label class="switch">
-            <input type="checkbox" id="notifyOnExitToggle" checked>
-            <span class="slider round"></span>
-          </label>
-        </div>
-      </div>
-
-      <button id="closeSettingModal" class="close-settings-btn">닫기</button>
     </div>
   </div>
 

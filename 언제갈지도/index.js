@@ -10,7 +10,7 @@ window.onload = function () {
     level: 3
   });
 
-  // ✨ 내 현재 위치를 표시할 CustomOverlay 변수 선언 (지도 확대/축소 시 크기 고정)
+  // 내 현재 위치를 표시할 CustomOverlay 변수 선언 (지도 확대/축소 시 크기 고정)
   let myLocationOverlay = null;
 
   // 전역에서 관리될 장소 데이터를 담을 배열
@@ -19,16 +19,21 @@ window.onload = function () {
   const currentMarkers = [];
   // `isInitialCenterSet` 플래그는 사용되지 않아 제거했습니다. 지도는 watchPosition에 따라 계속 움직입니다.
 
+  // 현재 지도에 표시된 반경 원 객체
+  let currentRadiusCircle = null; 
+
+  // 지도에 열려 있는 인포윈도우 객체
+  let currentOpenInfowindow = null; 
 
   // 🎛️ 주요 DOM 요소들을 미리 가져오기
   const menuToggleButton = document.getElementById('menuToggleButton');
   const mainMenu = document.getElementById('mainMenu');
   const placeBtn = document.getElementById('placeBtn');
   const loginBtn = document.getElementById('loginBtn');
-  const settingsBtn = document.getElementById('settingsBtn');
+  const Btn = document.getElementById('settingsBtn');
   const placeModal = document.getElementById('placeModal');
   const closeModal = document.getElementById('closeModal');
-  // ✨ '내 위치로 이동' 버튼
+  // '내 위치로 이동' 버튼
   const moveToCurrentLocationBtn = document.getElementById('moveToCurrentLocationBtn');
 
 
@@ -121,7 +126,11 @@ window.onload = function () {
       });
       // 마커 클릭 시 인포윈도우 표시
       kakao.maps.event.addListener(marker, 'click', () => {
+        if (currentOpenInfowindow) {
+          currentOpenInfowindow.closw();
+        }
         infowindow.open(map, marker);
+        currentOpenInfowindow = infowindow;
       });
     });
   }
@@ -150,6 +159,14 @@ window.onload = function () {
         <button class="delete-place-btn" data-id="${place.id}">삭제</button>
       `;
       placeListUl.appendChild(listItem);
+
+      const placeNameSpan = listItem.querySelector('span'); // 장소 이름이 있는 span을 클릭 가능하게
+      if (placeNameSpan) {
+        placeNameSpan.style.cursor = 'pointer'; // 클릭 가능한 것처럼 보이게 커서 변경
+        placeNameSpan.onclick = () => { // 클릭 시 지도 이동 함수 호출
+          moveMapToPlace(place.id);
+        };
+      }
     });
 
     // 삭제 버튼에 이벤트 리스너 추가
@@ -159,6 +176,23 @@ window.onload = function () {
         deletePlace(placeIdToDelete);
       };
     });
+  }
+
+    // 지도 이동 및 모달 닫기
+  function moveMapToPlace(placeId) {
+    const foundPlace = userPlaces.find(place => place.id === placeId);
+    if (foundPlace) {
+      const latlng = new kakao.maps.LatLng(foundPlace.lat, foundPlace.lng);
+      map.setCenter(latlng); // 지도를 해당 장소의 위치로 이동
+      console.log(`'${foundPlace.name}'(으)로 지도를 이동했습니다.`);
+      
+      // 모달이 열려 있다면 닫기
+      if (placeModal && placeModal.style.display === 'flex') {
+        placeModal.style.display = 'none';
+      }
+    } else {
+      console.warn(`ID ${placeId}를 가진 장소를 찾을 수 없습니다.`);
+    }
   }
 
   /**
@@ -227,12 +261,12 @@ window.onload = function () {
         const currentLng = position.coords.longitude;
         const userPosition = new kakao.maps.LatLng(currentLat, currentLng);
 
-        // ✨ watchPosition이 새 위치를 감지할 때마다 지도를 현재 위치로 계속 이동시킵니다.
+        // watchPosition이 새 위치를 감지할 때마다 지도를 현재 위치로 계속 이동시킵니다.
         map.setCenter(userPosition);
 
         console.log(`✅ 현재 위치: ${currentLat}, ${currentLng} (정확도: ${position.coords.accuracy}m)`);
 
-        // ✨ 내 위치 CustomOverlay 업데이트 또는 생성
+        // 내 위치 CustomOverlay 업데이트 또는 생성
         if (myLocationOverlay) {
           myLocationOverlay.setPosition(userPosition); // 위치만 업데이트
         } else {
@@ -245,7 +279,7 @@ window.onload = function () {
           });
         }
 
-        // ✨ Geofencing 로직: 저장된 모든 장소에 대해 현재 위치와의 거리 확인
+        // Geofencing 로직: 저장된 모든 장소에 대해 현재 위치와의 거리 확인
         userPlaces.forEach(place => {
           const distance = getDistance(currentLat, currentLng, place.lat, place.lng); // 미터 단위 거리 계산
 
@@ -271,7 +305,7 @@ window.onload = function () {
           }
         });
       },
-      // ⚠️ 위치 정보 가져오기 실패 시 콜백
+      // 위치 정보 가져오기 실패 시 콜백
       function (error) {
         console.warn('⚠️ 위치 정보를 지속적으로 가져올 수 없습니다.');
         console.error('위치 정보 오류 코드:', error.code);
@@ -320,7 +354,7 @@ window.onload = function () {
    *  [3] 이벤트 리스너: UI 상호작용
    * ========================================================= */
 
-  // ✨ 메뉴 토글 버튼 이벤트 리스너 (클래스 토글 방식으로 애니메이션 적용)
+  // 메뉴 토글 버튼 이벤트 리스너 (클래스 토글 방식으로 애니메이션 적용)
   if (menuToggleButton && mainMenu) {
     menuToggleButton.addEventListener('click', (e) => {
       e.stopPropagation(); // 이벤트 버블링 방지
@@ -338,7 +372,7 @@ window.onload = function () {
     });
   }
 
-  // ✨ 문서 어디든 클릭 시 드롭다운 메뉴 닫기
+  // 문서 어디든 클릭 시 드롭다운 메뉴 닫기
   document.addEventListener('click', (e) => {
     if (mainMenu && mainMenu.classList.contains('show')) {
       // 클릭된 요소가 메뉴 토글 버튼이나 메뉴 자체에 속하지 않으면 메뉴 닫기
@@ -350,7 +384,7 @@ window.onload = function () {
   });
 
 
-  // ✨ 메뉴 아이템(내 장소, 로그인, 설정) 클릭 이벤트
+  // 메뉴 아이템(내 장소, 로그인, 설정) 클릭 이벤트
   if (placeBtn) {
     placeBtn.addEventListener('click', () => {
       console.log('placeBtn 클릭됨! 모달을 엽니다.');
@@ -395,7 +429,7 @@ window.onload = function () {
   }
 
 
-  // ✨✨✨ '내 위치로 이동' 버튼 클릭 이벤트 (누락된 부분을 추가했습니다!) ✨✨✨
+  // '내 위치로 이동' 버튼 클릭 이벤트 (누락된 부분을 추가했습니다!)
   if (moveToCurrentLocationBtn) {
     moveToCurrentLocationBtn.addEventListener('click', () => {
       console.log('내 위치로 이동 버튼 클릭됨!');
@@ -440,23 +474,71 @@ window.onload = function () {
     });
   }
 
+    // 새로 추가된 함수: 지도 이동 및 모달 닫기
+  function moveMapToPlace(placeId) {
+    const foundPlace = userPlaces.find(place => place.id === placeId);
+    if (foundPlace) {
+      const latlng = new kakao.maps.LatLng(foundPlace.lat, foundPlace.lng);
+      map.setCenter(latlng); // 지도를 해당 장소의 위치로 이동
+      console.log(`'${foundPlace.name}'(으)로 지도를 이동했습니다.`);
+      
+      // 이전 반경 원이 있다면 지도에서 제거
+      if (currentRadiusCircle) {
+        currentRadiusCircle.setMap(null);
+        currentRadiusCircle = null; // null로 설정하여 참조 해제
+      }
+
+      // 새 반경 원 생성 및 지도에 표시
+      currentRadiusCircle = new kakao.maps.Circle({
+        map: map, // 지도 객체
+        center: latlng, // 원의 중심 좌표
+        radius: foundPlace.radius, // 원의 반지름 (미터 단위)
+        strokeWeight: 2, // 선의 두께
+        strokeColor: '#007BFF', // 선의 색깔 (파란색 계열)
+        strokeOpacity: 0.8, // 선의 불투명도
+        strokeStyle: 'solid', // 선의 스타일
+        fillColor: '#007BFF', // 채우기 색깔
+        fillOpacity: 0.2 // 채우기 불투명도
+      });
+
+      // 모달이 열려 있다면 닫기
+      if (placeModal && placeModal.style.display === 'flex') {
+        placeModal.style.display = 'none';
+      }
+    } else {
+      console.warn(`ID ${placeId}를 가진 장소를 찾을 수 없습니다.`);
+    }
+  }
+
 
   /* =========================================================
    *  [4] 카카오 맵 서비스 및 추가 이벤트 리스너 (기존과 동일)
    * ========================================================= */
 
-  // 🧭 지오코더 객체 생성 (좌표 → 주소 변환)
+  // 지오코더 객체 생성 (좌표 → 주소 변환)
   const geocoder = new kakao.maps.services.Geocoder();
-  // 🗺️ 장소 검색 객체 생성
+  // 장소 검색 객체 생성
   const ps = new kakao.maps.services.Places();
 
-  // 👆 좌클릭 시: 클릭한 위치의 위도/경도를 콘솔에 출력 (디버깅 용도)
+  // 좌클릭 시: 클릭한 위치의 위도/경도를 콘솔에 출력 (디버깅 용도)
   kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
     const latlng = mouseEvent.latLng;
     console.log(`좌클릭 → 위도: ${latlng.getLat()}, 경도: ${latlng.getLng()}`);
+
+    // 지도 빈 공간 클릭 시 인포윈도우 닫기 로직 추가
+    // mouseEvent.overlay가 null이면 지도의 빈 공간을 클릭한 것
+    // mouseEvent.overlayType이 'marker' 또는 'infowindow'가 아니라면
+    if (currentOpenInfowindow && (!mouseEvent.overlay || mouseEvent.overlay.type !== 'marker')) {
+        // mouseEvent.overlay를 통해 클릭된 객체가 마커인지 확인할 수 있지만
+        // 인포윈도우 닫기는 마커 위 클릭이 아닌 경우 (지도 클릭 또는 다른 곳 클릭) 발생해야 함.
+        // 현재 로직에서는 인포윈도우 자체 클릭 시에는 닫히지 않고,
+        // 지도를 클릭하면 닫히도록 의도.
+        currentOpenInfowindow.close();
+        currentOpenInfowindow = null;
+    }
   });
 
-  // 🖱️ 우클릭 시: 지도에 표시된 장소 정보 가져와 마커 표시 및 localStorage에 저장
+  // 우클릭 시: 지도에 표시된 장소 정보 가져와 마커 표시 및 localStorage에 저장
   kakao.maps.event.addListener(map, 'rightclick', function (mouseEvent) {
     const latlng = mouseEvent.latLng; // 우클릭한 위도, 경도
     let defaultName = "새로운 장소"; // 기본 장소 이름 초기화
@@ -513,11 +595,11 @@ window.onload = function () {
     const placeName = prompt("이 장소의 이름을 입력하세요:", initialName);
     if (!placeName || placeName.trim() === "") return; // 이름 입력 없으면 취소
 
-    // 알림 반경을 미터 단위로 입력받음 (기본값: 50m)
-    let radius = parseInt(prompt("알림 반경을 미터 단위로 입력하세요 (기본값: 50m):", "50"));
+    // 알림 반경을 미터 단위로 입력받음 (기본값: 1km)
+    let radius = parseInt(prompt("알림 반경을 미터 단위로 입력하세요 (기본값: 1km):", "1000"));
     // 유효하지 않은 입력(숫자가 아니거나 0 이하)일 경우 기본값 50m로 설정
     if (isNaN(radius) || radius <= 0) {
-      radius = 50;
+      radius = 1000;
     }
 
     const newPlace = {

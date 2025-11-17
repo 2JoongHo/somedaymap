@@ -56,17 +56,18 @@ header h1 span {
 
 /* 우측 상단 메뉴 */
 .main-menu {
-  position: relative; /* 드롭다운 메뉴 위치 지정 */
+  position: relative; /* 드롭다운 메뉴 위치 지정을 위해 */
   z-index: 101;
   }
 
-.menu-toggle-btn { /* 메뉴 토글 버튼 스타일 */
+.menu-toggle-btn { /* 새로 추가된 메뉴 토글 버튼 스타일 */
   background: none;
   border: none;
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
   transition: background-color 0.2s, transform 0.1s;
+  /* z-index: 101; 다른 메뉴 아이템 위에 표시 */
 }
 
 .menu-toggle-btn:hover {
@@ -82,11 +83,10 @@ header h1 span {
   height: 50px;
 }
 
-/* 드롭다운으로 나올 메뉴 리스트 스타일 */
-.menu-items {
+.menu-items { /* 드롭다운으로 나올 메뉴 리스트 스타일 */
   display: none; /* 기본적으로 숨겨져 있음 */
   position: absolute;
-  top: 79px; /* 헤더 높이(60px) + 여백(10px) = 70px 아래에 나타남 */
+  top: calc(100% + 10px); /* 헤더 높이(60px) + 여백(10px) = 70px 아래에 나타남 */
   right: 0; /* 오른쪽 끝에 정렬 */
   background: rgba(255, 255, 255, 0.7); /* 살짝 투명한 흰색 배경 */
   backdrop-filter: blur(8px);
@@ -162,7 +162,7 @@ footer {
 }
 
 /* 모달 오버레이 */
-#placeModal {
+#placeModal { /* ✨✨✨ .modal 이었던 선택자를 #placeModal로 변경했습니다! ✨✨✨ */
   display: none; /* 기본적으로 숨김 */
   position: fixed;
   inset: 0; /* top, right, bottom, left = 0 */
@@ -369,136 +369,4 @@ footer {
   width: 28px; /* 아이콘 크기 */
   height: 28px;
   filter: brightness(0) invert(0.2); /* 아이콘 색상 조절 (어둡게) */
-}
-
-/* 새로 추가된 앱 설정 모달 스타일 */
-#settingsModal .modal-content {
-    max-width: 450px; /* 설정 모달은 약간 더 넓게 */
-}
-
-#settingsModal h2 {
-    color: #4b80f9; /* 설정 제목 색상 */
-}
-
-.settings-group {
-    width: 100%;
-    margin-bottom: 20px;
-    padding: 15px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.settings-group:last-of-type {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.settings-group h3 {
-    text-align: left;
-    color: #333;
-    font-size: 1.2rem;
-    margin-top: 0;
-    margin-bottom: 15px;
-    border-bottom: 1px dashed rgba(0,0,0,0.1);
-    padding-bottom: 8px;
-}
-
-.setting-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    font-size: 1rem;
-    color: #333;
-}
-
-.setting-item input[type="number"] {
-    width: 80px;
-    padding: 8px 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    text-align: right;
-    font-size: 1rem;
-    background-color: rgba(255,255,255,0.7);
-    color: #333;
-}
-/* 토글 스위치 스타일 */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 28px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-  border-radius: 28px; /* 둥근 모양 */
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 20px;
-  width: 20px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-  border-radius: 50%; /* 둥근 버튼 */
-}
-
-input:checked + .slider {
-  background-color: #4b80f9; /* 켜졌을 때 색상 */
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #4b80f9;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(22px);
-  -ms-transform: translateX(22px);
-  transform: translateX(22px);
-}
-
-.close-settings-btn {
-  background-color: #4b80f9;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-top: 1.5rem;
-  max-width: 200px;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  transition: background-color 0.2s ease-in-out, transform 0.1s;
-  box-shadow: 0 4px 10px rgba(75, 128, 249, 0.3);
-}
-
-.close-settings-btn:hover {
-  background-color: #3a67d4;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(75, 128, 249, 0.4);
-}
-
-.close-settings-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 5px rgba(75, 128, 249, 0.2);
 }

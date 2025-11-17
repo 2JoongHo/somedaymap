@@ -194,19 +194,19 @@ footer {
 
 /* 모달 타이틀 */
 .modal-content h2 {
-  font-size: 1.6rem; /* 제목을 좀 더 키우고 */
-  color: #2c52ed;    /* 프로젝트 메인 컬러와 유사한 파란색 계열 */
-  margin-bottom: 1.5rem; /* 아래 여백 추가 */
+  font-size: 1.6rem;
+  color: orange;
+  margin-bottom: 1rem; /* 아래 여백 추가 */
   font-weight: 700;   /* 볼드 처리 */
 }
 
-/* 장소 목록 UL */
+/* 장소 목록 */
 #placeList {
   list-style: none; /* 기본 리스트 점 제거 */
   padding: 0;       /* 기본 패딩 제거 */
-  margin: 1.5rem 0; /* 위아래 여백 */
+  margin: 1rem 0; /* 위아래 여백 */
   width: 100%;      /* 부모 너비에 맞춤 */
-  max-height: 250px; /* 목록이 길어지면 스크롤 생기도록 최대 높이 설정 */
+  max-height: 300px; /* 목록이 길어지면 스크롤 생기도록 최대 높이 설정 */
   overflow-y: auto;  /* 스크롤 가능하게 */
   border-top: 1px solid rgba(255, 255, 255, 0.3); /* 상단 구분선 */
   padding-top: 1rem; /* 구분선 위아래 여백 */
@@ -308,7 +308,7 @@ footer {
   box-shadow: 0 2px 5px rgba(75, 128, 249, 0.2);
 }
 
-/* 현재 위치를 표기살 점 스타일 */
+/* 현재 위치를 표기할 점 스타일 */
 .my-location-dot {
   width: 18px; /* 화면상 고정된 픽셀 크기 (이동하면서 존재감을 보여줄 크기) */
   height: 18px;
@@ -324,12 +324,20 @@ footer {
 
 /* 내 위치 점 깜빡이 애니메이션 정의 */
 @keyframes pulse {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-  50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.7; }
-  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
 }
-
-
+  
 
 /* 지도 컨트롤 버튼 (내 위치 이동 버튼) 스타일 */
 .my-location-btn {

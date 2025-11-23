@@ -22,7 +22,7 @@ header {
   right: 0;
   height: 60px;
   background-color: rgba(255, 255, 255, 0.4); /* 살짝 투명한 하양 */
-  color: orange;
+  color: #ffa500;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -54,10 +54,16 @@ header h1 span {
   line-height: 1;     /* 텍스트 줄 간격 조정 */
 }
 
+.h1-gal {
+  color: #f5374d;
+}
+
 /* 우측 상단 메뉴 */
 .main-menu {
-  position: relative; /* 드롭다운 메뉴 위치 지정 */
-  z-index: 101;
+  position: absolute;
+  top: 60px;        /* header 바로 아래 */
+  left: 100px;
+  z-index: 3000;    /* header보다 높게 */
   }
 
 .menu-toggle-btn { /* 메뉴 토글 버튼 스타일 */
@@ -80,14 +86,40 @@ header h1 span {
 .menu-toggle-btn img {
   width: 50px; /* 아이콘 크기는 기존과 동일하게 */
   height: 50px;
+  filter: brightness(0) saturate(100%) invert(63%) sepia(97%) saturate(749%) hue-rotate(-1deg) brightness(103%) contrast(103%);
+}
+
+.search-toggle-btn { /* 메뉴 토글 버튼 스타일 */
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.search-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.search-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.search-toggle-btn img {
+  width: 40px; /* 아이콘 크기는 기존과 동일하게 */
+  height: 40px;
 }
 
 /* 드롭다운으로 나올 메뉴 리스트 스타일 */
 .menu-items {
   display: none; /* 기본적으로 숨겨져 있음 */
   position: absolute;
-  top: 79px; /* 헤더 높이(60px) + 여백(10px) = 70px 아래에 나타남 */
-  right: 0; /* 오른쪽 끝에 정렬 */
+  right: 0;
+  top: 15px; /* 헤더 높이(60px) + 여백(10px) = 70px 아래에 나타남 */
   background: rgba(255, 255, 255, 0.7); /* 살짝 투명한 흰색 배경 */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -96,7 +128,7 @@ header h1 span {
   list-style: none;
   padding: 8px;
   margin: 0;
-  z-index: 100; /* 헤더보다는 낮지만, 콘텐츠보다는 위에 */
+  z-index: 3001; /* 헤더보다는 낮지만, 콘텐츠보다는 위에 */
   max-width: calc(100vw - 2rem - 20px);
   width: max-content;
   box-sizing: border-box;
@@ -110,7 +142,7 @@ header h1 span {
 .menu-items.show {
   display: block;
   opacity: 1;
-  transform: translateY(0);
+  /* transform: translateY(0); */
 }
 
 .menu-items li {
@@ -162,7 +194,7 @@ footer {
 }
 
 /* 모달 오버레이 */
-#placeModal {
+#placeModal, #settingsModal, #searchModal {
   display: none; /* 기본적으로 숨김 */
   position: fixed;
   inset: 0; /* top, right, bottom, left = 0 */
@@ -219,7 +251,6 @@ footer {
   display: none;
 }
 
-
 /* 각 장소 LI 아이템 */
 #placeList li {
   background: rgba(255, 255, 255, 0.4); /* 각 아이템 배경도 투명하게 */
@@ -259,7 +290,6 @@ footer {
   padding: 1.5rem 1rem;
 }
 
-
 /* 삭제 버튼 */
 .delete-place-btn {
   background-color: #ff6b6b; /* 빨간색 계열 */
@@ -279,7 +309,7 @@ footer {
 }
 
 /* 닫기 버튼 */
-#closeModal {
+#closeModal, #closeSearchModal {
   background-color: #4b80f9; /* 메인 테마 색상 */
   color: white;
   border: none;
@@ -288,7 +318,6 @@ footer {
   font-size: 1rem;
   cursor: pointer;
   margin-top: 1.5rem; /* 위쪽 여백 추가 */
-
   max-width: 200px; /* 닫기 버튼의 최대 너비를 200px로 제한  */
   display: block;   /*  블록 요소로 만들고 margin: auto로 가운데 정렬 */
   margin-left: auto;
@@ -297,13 +326,13 @@ footer {
   box-shadow: 0 4px 10px rgba(75, 128, 249, 0.3); /* 은은한 그림자 */
 }
 
-#closeModal:hover {
+#closeModal:hover, #closeSearchModal:hover {
   background-color: #3a67d4;
   transform: translateY(-2px); /* 호버 시 살짝 위로 이동 */
   box-shadow: 0 6px 12px rgba(75, 128, 249, 0.4); /* 그림자 진해지게 */
 }
 
-#closeModal:active {
+#closeModal:active, #closeSearchModal:hover {
   transform: translateY(0); /* 클릭 시 원위치 */
   box-shadow: 0 2px 5px rgba(75, 128, 249, 0.2);
 }
@@ -380,9 +409,6 @@ footer {
 }
 
 /* 새로 추가된 앱 설정 모달 스타일 */
-#settingsModal .modal-content {
-    max-width: 450px; /* 설정 모달은 약간 더 넓게 */
-}
 
 #settingsModal h2 {
     color: #4b80f9; /* 설정 제목 색상 */

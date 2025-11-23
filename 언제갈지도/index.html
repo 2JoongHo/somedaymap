@@ -16,14 +16,22 @@
   <header>
     <h1>
       <!-- <img src="../src/assets/icon/logo5.svg" alt="logo"> -->
-      <span>언제갈지도</span>
+      <span>언제<span class="h1-gal">갈</span>지도</span>
     </h1>
+
+    <!-- 메뉴 버튼 -->
+    <button id="menuToggleButton" class="menu-toggle-btn">
+      <img src="../src/assets/icon/menuIcon.svg" alt="메뉴">
+    </button>
+
+    <!-- 검색 버튼 -->
+    <button id="openSearchModalBtn" class="search-toggle-btn">
+      <img src="../src/assets/icon/searchIcon3.svg" alt="검색">
+    </button>
 
     <!-- 상단 메뉴창 -->
     <nav class="main-menu">
-      <button id="menuToggleButton" class="menu-toggle-btn">
-        <img src="../src/assets/icon/menuIcon.svg" alt="메뉴">
-      </button>
+      <!-- 메뉴 버튼 리스트 -->
       <ul id="mainMenu" class="menu-items">
         <li><button id="placeBtn">내 장소</button></li>
         <li><button id="loginBtn">로그인</button></li>
@@ -37,12 +45,6 @@
   </button>
 
   <main>
-    <!-- 장소 검색 -->
-    <div id="search-container">
-        <input type="text" id="keyword" placeholder="장소 이름을 검색하세요." autocomplete="off">
-        <button id="searchBtn">검색</button>
-    </div>
-    
     <!-- 지도 표기 -->
     <div id="map"></div>
   </main>
@@ -83,8 +85,19 @@
           </label>
         </div>
       </div>
-
-      <button id="closeSettingModal" class="close-settings-btn">닫기</button>
+      <button id="closeModal">닫기</button>
+    </div>
+  </div>
+  
+  <!-- 검색 모달 -->
+  <div id="searchModal" class="placeModal">
+    <div class="modal-content">
+      <h2>장소 검색</h2>
+      <div class="search-modal-container">
+        <input type="text" id="keyword" placeholder="장소 이름을 검색하세요..." autocomplete="off">
+        <button id="searchBtn">검색</button>
+      </div>
+      <button id="closeSearchModal">닫기</button>
     </div>
   </div>
 

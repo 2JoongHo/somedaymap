@@ -30,11 +30,17 @@ window.onload = function () {
   const mainMenu = document.getElementById('mainMenu');
   const placeBtn = document.getElementById('placeBtn');
   const loginBtn = document.getElementById('loginBtn');
-  const Btn = document.getElementById('settingsBtn');
+  const settingsBtn = document.getElementById('settingsBtn');
   const placeModal = document.getElementById('placeModal');
   const closeModal = document.getElementById('closeModal');
+  const settingsModal = document.getElementById('settingsModal');
   // '내 위치로 이동' 버튼
   const moveToCurrentLocationBtn = document.getElementById('moveToCurrentLocationBtn');
+  const openSearchModalBtn = document.getElementById('openSearchModalBtn');
+  const searchModal = document.getElementById('searchModal');
+  const closeSearchModal = document.getElementById('closeSearchModal');
+  const keywordInput = document.getElementById('keyword');
+  const searchBtn = document.getElementById('searchBtn');
 
 
   /* =========================================================
@@ -144,7 +150,7 @@ window.onload = function () {
 
     if (userPlaces.length === 0) {
       const noPlaceLi = document.createElement('li');
-      noPlaceLi.textContent = '등록된 장소가 없습니다.';
+      noPlaceLi.textContent = '언젠가 가보고 싶은 곳을 찍어보세요!';
       noPlaceLi.id = 'no-places-message'; // CSS 스타일링을 위한 ID
       placeListUl.appendChild(noPlaceLi);
       return;
@@ -406,9 +412,57 @@ window.onload = function () {
   if (settingsBtn) {
     settingsBtn.addEventListener('click', () => {
       if (mainMenu) { mainMenu.classList.remove('show'); mainMenu.style.display = 'none'; } // 메뉴 닫기
-      alert("앱 설정창 열기");
+      if (settingsModal) {
+        loadSettingsFromLocalStorage(); // 모달 열기 전에 최신 설정 불러와 UI에 적용
+        settingsModal.style.display = 'flex'; // ✨✨✨ 설정 모달 열기 ✨✨✨
+      } else {
+        console.error('settingsModal 요소를 찾을 수 없습니다.');
+      }
     });
   }
+
+  // ✨✨✨ 새로 추가: 지도 위에 별도로 띄울 검색 버튼 클릭 이벤트 ✨✨✨
+if (openSearchModalBtn) {
+  openSearchModalBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // 이벤트 버블링 방지 (혹시 모를 상위 요소 클릭 방지)
+    if (searchModal) {
+      searchModal.style.display = 'flex'; // ✨✨✨ 검색 모달 열기! ✨✨✨
+      // 모달이 열리면 검색 input에 포커스 (사용자 편의성)
+      // keywordInput 변수가 null이 아니라면 포커스 (HTML에 id="keyword" 요소가 있어야 함)
+      if (keywordInput) keywordInput.focus();
+
+      // 혹시 열려있는 메뉴 있으면 닫기 (UX 개선)
+      if (mainMenu && mainMenu.classList.contains('show')) {
+        mainMenu.classList.remove('show');
+        mainMenu.style.display = 'none';
+      }
+    } else {
+      console.error('searchModal 요소를 찾을 수 없습니다.'); // HTML에 searchModal id가 없는 경우
+    }
+  });
+}
+
+// ✨✨✨ 검색 모달 닫기 버튼 및 외부 영역 클릭 이벤트는 이전과 동일 ✨✨✨
+if (closeSearchModal) {
+  closeSearchModal.addEventListener('click', () => {
+    console.log('closeSearchModal 클릭됨! 모달을 닫습니다.');
+    if (searchModal) {
+      searchModal.style.display = 'none';
+      clearSearchResults(); // 모달 닫을 때 기존 검색 결과 마커/인포윈도우도 지움
+      keywordInput.value = ''; // 검색창 내용도 지움
+    }
+  });
+}
+if (searchModal) {
+  searchModal.addEventListener('click', e => {
+    if (e.target === searchModal) { // 모달의 바깥 영역을 클릭했는지 확인
+      console.log('검색 모달 바깥 영역 클릭됨! 모달을 닫습니다.');
+      searchModal.style.display = 'none';
+      clearSearchResults(); // 모달 닫을 때 기존 검색 결과 마커/인포윈도우도 지움
+      keywordInput.value = ''; // 검색창 내용도 지움
+    }
+  });
+}
 
   // ✨ 모달 닫기 버튼 및 외부 영역 클릭 이벤트
   if (closeModal) {
@@ -428,8 +482,7 @@ window.onload = function () {
     });
   }
 
-
-  // '내 위치로 이동' 버튼 클릭 이벤트 (누락된 부분을 추가했습니다!)
+  // '내 위치로 이동' 버튼 클릭 이벤트
   if (moveToCurrentLocationBtn) {
     moveToCurrentLocationBtn.addEventListener('click', () => {
       console.log('내 위치로 이동 버튼 클릭됨!');
@@ -463,7 +516,7 @@ window.onload = function () {
           // getCurrentPosition 옵션 설정
           {
             enableHighAccuracy: true,
-            timeout: 15000, // 5초 내에 위치 정보 가져오지 못하면 실패
+            timeout: 15000, // 15초 내에 위치 정보 가져오지 못하면 실패
             maximumAge: 0
           }
         );

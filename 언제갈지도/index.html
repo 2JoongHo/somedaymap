@@ -1,109 +1,111 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>언제갈지도 | SomedayMap</title>
-  <link rel="stylesheet" href="index.css" />
-  <!-- 🔑 카카오 지도 API 불러오기 -->
-  <!-- libraries=services는 장소 검색, 주소-좌표 변환 등을 위해 필요 -->
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=6769ff1e824932a4aba8297bb6eab4df&libraries=services"></script>
-  <!-- JavaScript 파일은 HTML Body 닫는 태그 바로 위에 두는 것이 DOM 로딩 완료를 기다리는 더 안정적인 방법이지만,
-       window.onload를 사용하면 head에서도 작동 가능 -->
-  <script src="index.js"></script>
-</head>
-<body>
-  <header>
-    <h1>
-      <!-- <img src="../src/assets/icon/logo5.svg" alt="logo"> -->
-      <span>언제<span class="h1-gal">갈</span>지도</span>
-    </h1>
-
-    <!-- 메뉴 버튼 -->
-    <button id="menuToggleButton" class="menu-toggle-btn">
-      <img src="../src/assets/icon/menuIcon.svg" alt="메뉴">
-    </button>
-
-    <!-- 검색 버튼 -->
-    <button id="openSearchModalBtn" class="search-toggle-btn">
-      <img src="../src/assets/icon/searchIcon3.svg" alt="검색">
-    </button>
-
-    <!-- 상단 메뉴창 -->
-    <nav class="main-menu">
-      <!-- 메뉴 버튼 리스트 -->
-      <ul id="mainMenu" class="menu-items">
-        <li><button id="placeBtn">내 장소</button></li>
-        <li><button id="loginBtn">로그인</button></li>
-        <li><button id="settingsBtn">설정</button></li>
-      </ul>
-    </nav>
-  </header>
-
-  <button id="moveToCurrentLocationBtn" class="my-location-btn">
-    <img src="../src/assets/icon/locationIcon.svg" alt="내 위치로 이동">
-  </button>
-
-  <main>
-    <!-- 지도 표기 -->
-    <div id="map"></div>
-  </main>
-
-  <!-- 내 장소 목록 모달 -->
-  <div id="placeModal" class="placeModal">
-    <div class="modal-content">
-      <h2>내 장소 목록</h2>
-      <ul id="placeList">
-        <li>등록된 장소가 없습니다.</li>
-      </ul>
-      <button id="closeModal">닫기</button>
-    </div>
-  </div>
-
-  <!-- 앱 설정 모달 -->
-  <div id="settingsModal" class="placeModal">
-    <div class="modal-content">
-      <h2>앱 설정</h2>
-      <div class="settings-group">
-        <h3>지오펜싱 & 위치</h3>
-        <div class="setting-item">
-          <span>새 장소 기본 알림 반경</span>
-          <input type="number" id="defaultRadiusInput" value="1000" min="10" max="5000" step="10">m
-        </div>
-        <div class="setting-item">
-          <span>장소 진입 시 알림</span>
-          <label class="switch">
-            <input type="checkbox" id="notifyOnEnterToggle" checked>
-            <span class="slider round"></span>
-          </label>
-        </div>
-        <div class="setting-item">
-          <span>장소 이탈 시 알림</span>
-          <label class="switch">
-            <input type="checkbox" id="notifyOnExitToggle" checked>
-            <span class="slider round"></span>
-          </label>
-        </div>
-      </div>
-      <button id="closeModal">닫기</button>
-    </div>
-  </div>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>언제갈지도 | SomedayMap</title>
+    <link rel="stylesheet" href="index.css" />
+    <!-- 🔑 카카오 지도 API 불러오기 -->
+    <!-- libraries=services는 장소 검색, 주소-좌표 변환 등을 위해 필요 -->
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=6769ff1e824932a4aba8297bb6eab4df&libraries=services"></script>
+    <!-- JavaScript 파일은 HTML Body 닫는 태그 바로 위에 두는 것이 DOM 로딩 완료를 기다리는 더 안정적인 방법이지만,
+        window.onload를 사용하면 head에서도 작동 가능 -->
+    <script src="index.js"></script>
+  </head>
   
-  <!-- 검색 모달 -->
-  <div id="searchModal" class="placeModal">
-    <div class="modal-content">
-      <h2>장소 검색</h2>
-      <div class="search-modal-container">
-        <input type="text" id="keyword" placeholder="장소 이름을 검색하세요..." autocomplete="off">
-        <button id="searchBtn">검색</button>
-      </div>
-      <button id="closeSearchModal">닫기</button>
-    </div>
-  </div>
+  <body>
+    <header>
+      <h1>
+        <!-- <img src="../src/assets/icon/logo5.svg" alt="logo"> -->
+        <span>언제<span class="h1-gal">갈</span>지도</span>
+      </h1>
 
-  <!-- 화면 하단 -->
-  <footer>
-    <p>© 2025 언제갈지도 — Created by 멍순이</p>
-  </footer>
-</body>
+      <!-- 메뉴 버튼 -->
+      <button id="menuToggleButton" class="menu-toggle-btn">
+        <img src="../src/assets/icon/menuIcon.svg" alt="메뉴">
+      </button>
+
+      <!-- 검색 버튼 -->
+      <button id="openSearchModalBtn" class="search-toggle-btn">
+        <img src="../src/assets/icon/searchIcon3.svg" alt="검색">
+      </button>
+
+      <!-- 상단 메뉴창 -->
+      <nav class="main-menu">
+        <!-- 메뉴 버튼 리스트 -->
+        <ul id="mainMenu" class="menu-items">
+          <li><button id="placeBtn">내 장소</button></li>
+          <li><button id="loginBtn">로그인</button></li>
+          <li><button id="settingsBtn">설정</button></li>
+        </ul>
+      </nav>
+    </header>
+
+    <button id="moveToCurrentLocationBtn" class="my-location-btn">
+      <img src="../src/assets/icon/locationIcon.svg" alt="내 위치로 이동">
+    </button>
+
+    <main>
+      <!-- 지도 표기 -->
+      <div id="map"></div>
+    </main>
+
+    <!-- 내 장소 목록 모달 -->
+    <div id="placeModal" class="placeModal">
+      <div class="modal-content">
+        <h2>내 장소 목록</h2>
+        <ul id="placeList">
+          <li>등록된 장소가 없습니다.</li>
+        </ul>
+        <button id="closeModal">닫기</button>
+      </div>
+    </div>
+
+    <!-- 앱 설정 모달 -->
+    <div id="settingsModal" class="placeModal">
+      <div class="modal-content">
+        <h2>앱 설정</h2>
+        <div class="settings-group">
+          <h3>지오펜싱 & 위치</h3>
+          <div class="setting-item">
+            <span>새 장소 기본 알림 반경</span>
+            <input type="number" id="defaultRadiusInput" value="1000" min="10" max="5000" step="10">m
+          </div>
+          <div class="setting-item">
+            <span>장소 진입 시 알림</span>
+            <label class="switch">
+              <input type="checkbox" id="notifyOnEnterToggle" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="setting-item">
+            <span>장소 이탈 시 알림</span>
+            <label class="switch">
+              <input type="checkbox" id="notifyOnExitToggle" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+        <button id="closeModal">닫기</button>
+      </div>
+    </div>
+    
+    <!-- 검색 모달 -->
+    <div id="searchModal" class="placeModal">
+      <div class="modal-content">
+        <h2>장소 검색</h2>
+        <div class="search-modal-container">
+          <input type="text" id="keyword" placeholder="장소 이름을 검색하세요..." autocomplete="off">
+          <button id="searchBtn">검색</button>
+        </div>
+        <ul id="searchResultsList"></ul>
+        <button id="closeSearchModal" class="modal-close-btn">닫기</button>
+      </div>
+    </div>
+
+    <!-- 화면 하단 -->
+    <footer>
+      <p>© 2025 언제갈지도 — Created by 멍순이</p>
+    </footer>
+  </body>
 </html>

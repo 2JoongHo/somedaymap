@@ -114,6 +114,64 @@ header h1 span {
   height: 40px;
 }
 
+/* 📍 검색 결과 목록 */
+#searchResultsList {
+  list-style: none; /* 기본 리스트 점 제거 */
+  padding: 0;       /* 기본 패딩 제거 */
+  margin: 1rem 0; /* 위아래 여백 */
+  width: 100%;      /* 부모 너비에 맞춤 */
+  max-height: 300px; /* 목록이 길어지면 스크롤 생기도록 최대 높이 설정 */
+  overflow-y: auto;  /* 스크롤 가능하게 */
+  border-top: 1px solid rgba(255, 255, 255, 0.3); /* 상단 구분선 */
+  padding-top: 1rem; /* 구분선 위아래 여백 */
+  scrollbar-width: none; /* Firefox 스크롤바 숨김 */
+  -ms-overflow-style: none; /* IE, Edge 스크롤바 숨김 */
+}
+
+/* Chrome, Safari 스크롤바 숨김 */
+#searchResultsList::-webkit-scrollbar {
+  display: none;
+}
+
+/* 각 검색 결과 LI 아이템 */
+#searchResultsList li {
+  background: rgba(255, 255, 255, 0.4); /* 각 아이템 배경도 투명하게 */
+  border-radius: 8px; /* 둥근 모서리 */
+  padding: 0.8rem 1rem; /* 내부 여백 */
+  margin-bottom: 0.8rem; /* 아이템 간 간격 */
+  display: flex;         /* 내용과 버튼을 가로로 배치 */
+  justify-content: space-between; /* 내용과 버튼을 양 끝으로 */
+  align-items: center;   /* 세로 중앙 정렬 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 은은한 그림자 */
+  transition: all 0.2s ease-in-out; /* 부드러운 전환 효과 */
+  font-size: 0.95rem; /* 폰트 크기 조정 */
+  color: #333; /* 글자 색상 */
+  text-align: left; /* 텍스트 왼쪽 정렬 */
+}
+
+#searchResultsList li:last-child {
+  margin-bottom: 0; /* 마지막 아이템 아래 간격 제거 */
+}
+
+#searchResultsList li span {
+  flex-grow: 1; /* 이름이 길어지면 공간을 채우도록 */
+  margin-right: 10px; /* 버튼과의 간격 */
+  font-weight: 500; /* 이름 볼드 */
+  white-space: nowrap; /* 줄바꿈 방지 */
+  overflow: hidden; /* 넘치는 내용 숨김 */
+  text-overflow: ellipsis; /* ...으로 표시 */
+}
+
+/* 검색 결과 없을 때 메시지 */
+#searchResultsList li#no-search-results { /* `showSearchResults`에서 id를 'no-search-results'로 설정하면 이 스타일이 적용됩니다. */
+  background: none;
+  box-shadow: none;
+  color: #666;
+  text-align: center;
+  font-style: italic;
+  padding: 1.5rem 1rem;
+}
+
 /* 드롭다운으로 나올 메뉴 리스트 스타일 */
 .menu-items {
   display: none; /* 기본적으로 숨겨져 있음 */

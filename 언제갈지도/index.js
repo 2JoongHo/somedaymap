@@ -27,13 +27,15 @@ window.onload = function () {
 
   // 🎛️ 주요 DOM 요소들을 미리 가져오기
   const menuToggleButton = document.getElementById('menuToggleButton');
-  const mainMenu = document.getElementById('mainMenu');
+  // const mainMenu = document.getElementById('mainMenu');
+  const mainMenu = document.querySelector('nav.main-menu');
   const placeBtn = document.getElementById('placeBtn');
   const loginBtn = document.getElementById('loginBtn');
   const settingsBtn = document.getElementById('settingsBtn');
   const placeModal = document.getElementById('placeModal');
   const closeModal = document.getElementById('closeModal');
   const settingsModal = document.getElementById('settingsModal');
+  const closeSettingsModal = document.getElementById('closeSettingsModal');
   // '내 위치로 이동' 버튼
   const moveToCurrentLocationBtn = document.getElementById('moveToCurrentLocationBtn');
   const openSearchModalBtn = document.getElementById('openSearchModalBtn');
@@ -41,6 +43,7 @@ window.onload = function () {
   const closeSearchModal = document.getElementById('closeSearchModal');
   const keywordInput = document.getElementById('keyword');
   const searchBtn = document.getElementById('searchBtn');
+  const searchResultsList = document.getElementById('searchResultsList')
 
 
   /* =========================================================
@@ -133,7 +136,7 @@ window.onload = function () {
       // 마커 클릭 시 인포윈도우 표시
       kakao.maps.event.addListener(marker, 'click', () => {
         if (currentOpenInfowindow) {
-          currentOpenInfowindow.closw();
+          currentOpenInfowindow.close();
         }
         infowindow.open(map, marker);
         currentOpenInfowindow = infowindow;
@@ -439,6 +442,49 @@ if (openSearchModalBtn) {
     } else {
       console.error('searchModal 요소를 찾을 수 없습니다.'); // HTML에 searchModal id가 없는 경우
     }
+  });
+}
+
+// 검색 버튼 클릭 시 찾기
+searchBtn.addEventListener('click', () => {
+  const keyword = keywordInput.value.trim();
+  if (!keyword) return alert("검색어를 입력하세요!");
+
+  const results = userPlaces.filter(place =>
+    place.name.includes(keyword) || place.name.toLowerCase().includes(keyword.toLowerCase())
+  );
+
+  showSearchResults(results);
+});
+
+// 검색 결과를 모달에 표시
+function showSearchResults(results) {
+  const placeList = document.getElementById('placeList');
+
+  placeList.innerHTML = ''; // 기존 내용 초기화
+
+  if (results.length === 0) {
+    placeList.innerHTML = `<li>검색 결과가 없습니다.</li>`;
+    return;
+  }
+
+  results.forEach(place => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span>${place.name}</span>
+      <button class="delete-place-btn" data-id="${place.id}">삭제</button>
+    `;
+
+    // 클릭하면 지도 이동
+    li.querySelector('span').onclick = () => moveMapToPlace(place.id);
+
+    // 삭제
+    li.querySelector('button').onclick = () => {
+      deletePlace(place.id);
+      showSearchResults(results.filter(r => r.id !== place.id)); // 결과 업데이트
+    };
+
+    placeList.appendChild(li);
   });
 }
 

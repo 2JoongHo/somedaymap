@@ -1,35 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// 📁 src/App.jsx
+import { useState } from "react";
+import Map from "./components/Map";
+import Menu from "./components/Menu.jsx";
+import SearchModal from "./components/SearchModal";
+import PlaceModal from "./components/PlaceModal";
+import SettingsModal from "./components/SettingsModal";
+import { PlacesProvider } from "./context/PlacesContext";
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [placeOpen, setPlaceOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <PlacesProvider>
+      <header>
+        <h1>
+          언제<span className="h1-gal">갈</span>지도
+        </h1>
 
-export default App
+        <button className="menu-toggle-btn" onClick={() => setPlaceOpen(true)}>
+          <img src="/src/assets/icon/menuIcon.svg" alt="menu" />
+        </button>
+
+        <button className="search-toggle-btn" onClick={() => setSearchOpen(true)}>
+          <img src="/src/assets/icon/searchIcon3.svg" alt="search" />
+        </button>
+      </header>
+
+      <main>
+        <Menu openSettings={() => setSettingsOpen(true)} />
+        <Map/>
+      </main>
+
+      {/* 모달 */}
+      <PlaceModal open={placeOpen} onClose={() => setPlaceOpen(false)}/>
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)}/>
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)}/>
+    </PlacesProvider>
+  );
+}

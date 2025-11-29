@@ -1,42 +1,659 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+  font-family: 'Pretendard', sans-serif;
+  margin: 0;
+  background-color: #f4f6fa;
+  color: #333;
+}
+
+/* 언제갈지도 로고와 헤더 */
+header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: rgba(255, 255, 255, 0.4); /* 살짝 투명한 하양 */
+  color: #ffa500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* padding: 0 1rem; // 이 주석을 풀면 양쪽에 여백이 생깁니다 */
+  z-index: 100;
+  backdrop-filter: blur(4px); /* 배경 블러 효과 */
+  -webkit-backdrop-filter: blur(4px); /* Safari 대응 */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15); /* 🌫️ 자연스러운 그림자 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* 미세한 경계선 */
+}
+
+header h1 {
+  flex-grow: 1;
   text-align: center;
+  margin: 0;  /* 기본 마진 제거 */
+  padding: 0; /* 기본 패딩 제거 */
+  position: absolute; /* 중앙 정렬을 위해 절대 위치 지정 */
+  left: 50%;
+  transform: translateX(-50%);
+  /* width: auto; */
+  white-space: nowrap;
+  z-index: 1;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+header h1 span {
+  font-size: 2rem;    /* 로고 텍스트 크기 키우기 */
+  font-weight: 700;   /* 볼드 처리 */
+  color: orange;    /* 텍스트 색상을 주황색으로 */
+  line-height: 1;     /* 텍스트 줄 간격 조정 */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.h1-gal {
+  color: #f5374d;
+}
+
+/* 좌측 상단 메뉴 */
+.main-menu {
+  position: absolute;
+  top: 75px;        /* header 바로 아래 */
+  left: 0px;
+  z-index: 3000;    /* header보다 높게 */
   }
-  to {
-    transform: rotate(360deg);
+
+.menu-toggle-btn { /* 메뉴 토글 버튼 스타일 */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.menu-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.menu-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.menu-toggle-btn img {
+  width: 50px; /* 아이콘 크기는 기존과 동일하게 */
+  height: 50px;
+  filter: brightness(0) saturate(100%) invert(63%) sepia(97%) saturate(749%) hue-rotate(-1deg) brightness(103%) contrast(103%);
+}
+
+
+.search-toggle-btn { /* 메뉴 토글 버튼 스타일 */
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.search-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.search-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.search-toggle-btn img {
+  width: 40px; /* 아이콘 크기는 기존과 동일하게 */
+  height: 40px;
+}
+
+/* 📍 검색 결과 목록 */
+#searchResultsList {
+  list-style: none; /* 기본 리스트 점 제거 */
+  padding: 0;       /* 기본 패딩 제거 */
+  margin: 1rem 0; /* 위아래 여백 */
+  width: 100%;      /* 부모 너비에 맞춤 */
+  max-height: 300px; /* 목록이 길어지면 스크롤 생기도록 최대 높이 설정 */
+  overflow-y: auto;  /* 스크롤 가능하게 */
+  border-top: 1px solid rgba(255, 255, 255, 0.3); /* 상단 구분선 */
+  padding-top: 1rem; /* 구분선 위아래 여백 */
+  scrollbar-width: none; /* Firefox 스크롤바 숨김 */
+  -ms-overflow-style: none; /* IE, Edge 스크롤바 숨김 */
+}
+
+/* Chrome, Safari 스크롤바 숨김 */
+#searchResultsList::-webkit-scrollbar {
+  display: none;
+}
+
+/* 각 검색 결과 LI 아이템 */
+#searchResultsList li {
+  background: rgba(255, 255, 255, 0.4); /* 각 아이템 배경도 투명하게 */
+  border-radius: 8px; /* 둥근 모서리 */
+  padding: 0.8rem 1rem; /* 내부 여백 */
+  margin-bottom: 0.8rem; /* 아이템 간 간격 */
+  display: flex;         /* 내용과 버튼을 가로로 배치 */
+  justify-content: space-between; /* 내용과 버튼을 양 끝으로 */
+  align-items: center;   /* 세로 중앙 정렬 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 은은한 그림자 */
+  transition: all 0.2s ease-in-out; /* 부드러운 전환 효과 */
+  font-size: 0.95rem; /* 폰트 크기 조정 */
+  color: #333; /* 글자 색상 */
+  text-align: left; /* 텍스트 왼쪽 정렬 */
+}
+
+#searchResultsList li:last-child {
+  margin-bottom: 0; /* 마지막 아이템 아래 간격 제거 */
+}
+
+#searchResultsList li span {
+  flex-grow: 1; /* 이름이 길어지면 공간을 채우도록 */
+  margin-right: 10px; /* 버튼과의 간격 */
+  font-weight: 500; /* 이름 볼드 */
+  white-space: nowrap; /* 줄바꿈 방지 */
+  overflow: hidden; /* 넘치는 내용 숨김 */
+  text-overflow: ellipsis; /* ...으로 표시 */
+}
+
+/* 검색 결과 없을 때 메시지 */
+#searchResultsList li#no-search-results { /* `showSearchResults`에서 id를 'no-search-results'로 설정하면 이 스타일이 적용됩니다. */
+  background: none;
+  box-shadow: none;
+  color: #666;
+  text-align: center;
+  font-style: italic;
+  padding: 1.5rem 1rem;
+}
+
+#searchResultsList li:hover {
+  background-color: rgba(75, 128, 249, 0.1); /* 호버 시 살짝 색상 변화 */
+  color: #4b80f9; /* 호버 시 텍스트 색상 변화 */
+  cursor: pointer; /* 마우스 포인터 변경 */
+}
+
+/* search-modal-container 내부의 입력란과 버튼 스타일 */
+.search-modal-container {
+  display: flex; /* 내부 요소들을 가로로 나열 */
+  gap: 8px; /* 입력란과 버튼 사이에 간격 주기 */
+  margin-bottom: 15px; /* 검색창 아래 여백 */
+}
+
+/* 장소 검색 입력란 (#keyword) 스타일 */
+#keyword {
+  flex-grow: 1; /* ✨✨ 검색 입력란이 남은 공간을 모두 채우도록! ✨✨ */
+  padding: 10px 12px; /* 위아래, 양옆 여백 */
+  border: 1px solid #ccc; /* 테두리 색상 */
+  border-radius: 8px; /* 둥근 모서리 */
+  font-size: 1rem; /* 글자 크기 */
+  /* placeholder 글자 색상 조절 (선택 사항) */
+  color: #333; /* 기본 글자 색상 */
+}
+
+#keyword::placeholder {
+  color: #999;
+}
+
+/* 검색 버튼 (#searchBtn) 스타일 */
+#searchBtn {
+  padding: 10px 15px;
+  background-color: #007bff; /* 파란색 배경 */
+  color: white; /* 흰색 글자 */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  min-width: 70px; /* 버튼 최소 너비 지정 */
+}
+
+#searchBtn:hover {
+  background-color: #0056b3; /* 호버 시 색상 변경 */
+}
+
+/* 드롭다운으로 나올 메뉴 리스트 스타일 */
+.menu-items {
+  display: none; /* 기본적으로 숨겨져 있음 */
+  position: absolute;
+
+
+  background: rgba(255, 255, 255, 0.7); /* 살짝 투명한 흰색 배경 */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+  z-index: 3001; /* 헤더보다는 낮지만, 콘텐츠보다는 위에 */
+  max-width: calc(100vw - 2rem - 20px);
+  width: max-content;
+  box-sizing: border-box;
+  text-align: right; /* 메뉴 아이템 버튼들을 왼쪽으로 정렬 */
+  opacity: 10;  /* 초기 상태에서 투명도 설정 */
+  transform: translateY(-13px); /* 초기 상태에서 약간 위로 이동 */
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* .menu-items에 .show 클래스가 붙었을 때 (JS로 제어) */
+.menu-items.show {
+  display: block;
+  opacity: 1;
+  /* transform: translateY(0); */
+}
+
+.menu-items li {
+  padding: 0px;
+  margin: 4px;
+  display: block; /* 각 아이템을 세로로 정렬 */
+}
+
+.menu-items li:last-child {
+  margin-bottom: 0; /* 마지막 아이템은 아래 간격 제거 */
+}
+
+.menu-items li button {
+  background: none; /* 배경 없음 */
+  border: none;
+  cursor: pointer;
+  width: 100%; /* 버튼이 li 너비를 꽉 채우도록 */
+  padding: 10px 12px; /* 버튼 클릭 영역 및 내부 여백 */
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s; /* 호버 시 색상 전환 */
+  text-align: center; /* 텍스트만 있으니 왼쪽 정렬! */
+  color: orange; /* 텍스트 색상 */
+  font-size: 1rem; /* 폰트 크기 조정 */
+}
+
+.menu-items li button:hover {
+  background-color: rgba(75, 128, 249, 0.1); /* 호버 시 살짝 색상 변화 */
+  color: #4b80f9; /* 호버 시 텍스트 색상 변화 */
+  cursor: pointer; /* 마우스 포인터 변경 */
+}
+
+.menu-items li button:active {
+  transform: scale(0.98); /* 클릭 시 살짝 작아지는 효과 */
+  background-color: rgba(75, 128, 249, 0.25);
+  color: #2c52ed;
+}
+  
+/* 지도 표기 */
+#map {
+  width: 100%;
+  height: 100vh; /* 화면 전체 높이 사용 */
+  min-height: 300px; /* 너무 작아지지 않게 최소 높이 */
+  position: relative;
+  z-index: 1; /* 헤더보다 아래에 있도록 */
+}
+
+/* 화면 하단 */
+footer {
+  display: none; /* 현재는 사용하지 않도록 숨김 */
+}
+
+/* 모달 오버레이 */
+#placeModal, #settingsModal, #searchModal {
+  display: none; /* 기본적으로 숨김 */
+  position: fixed;
+  inset: 0; /* top, right, bottom, left = 0 */
+  z-index: 9999; /* 최상위 */
+  background: rgba(255, 255, 255, 0.15); /* 반투명 배경 */
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  justify-content: center; /* 모달 내용을 수평 가운데 정렬 */
+  align-items: center;   /* 모달 내용을 수직 가운데 정렬 */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 모달 안의 내용 컨테이너 */
+.modal-content {
+  background: rgba(255, 255, 255, 0.25); /* 살짝 투명한 유리 느낌 */
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 모달 내부 요소들을 수평 중앙 정렬 */
+}
+
+/* 모달 타이틀 */
+.modal-content h2 {
+  font-size: 1.6rem;
+  color: orange;
+  margin-bottom: 1rem; /* 아래 여백 추가 */
+  font-weight: 700;   /* 볼드 처리 */
+}
+
+/* 장소 목록 */
+#placeList {
+  list-style: none; /* 기본 리스트 점 제거 */
+  padding: 0;       /* 기본 패딩 제거 */
+  margin: 1rem 0; /* 위아래 여백 */
+  width: 100%;      /* 부모 너비에 맞춤 */
+  max-height: 300px; /* 목록이 길어지면 스크롤 생기도록 최대 높이 설정 */
+  overflow-y: auto;  /* 스크롤 가능하게 */
+  border-top: 1px solid rgba(255, 255, 255, 0.3); /* 상단 구분선 */
+  padding-top: 1rem; /* 구분선 위아래 여백 */
+  scrollbar-width: none; /* Firefox 스크롤바 숨김 */
+  -ms-overflow-style: none; /* IE, Edge 스크롤바 숨김 */
+}
+
+/* Chrome, Safari 스크롤바 숨김 */
+#placeList::-webkit-scrollbar {
+  display: none;
+}
+
+/* 각 장소 LI 아이템 */
+#placeList li {
+  background: rgba(255, 255, 255, 0.4); /* 각 아이템 배경도 투명하게 */
+  border-radius: 8px; /* 둥근 모서리 */
+  padding: 0.8rem 1rem; /* 내부 여백 */
+  margin-bottom: 0.8rem; /* 아이템 간 간격 */
+  display: flex;         /* 내용과 버튼을 가로로 배치 */
+  justify-content: space-between; /* 내용과 버튼을 양 끝으로 */
+  align-items: center;   /* 세로 중앙 정렬 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 은은한 그림자 */
+  transition: all 0.2s ease-in-out; /* 부드러운 전환 효과 */
+  font-size: 0.95rem; /* 폰트 크기 조정 */
+  color: #333; /* 글자 색상 */
+  text-align: left; /* 텍스트 왼쪽 정렬 */
+  cursor: pointer; /* 마우스 포인터 변경 */
+}
+
+#placeList li:last-child {
+  margin-bottom: 0; /* 마지막 아이템 아래 간격 제거 */
+}
+
+#placeList li span {
+  flex-grow: 1; /* 이름이 길어지면 공간을 채우도록 */
+  margin-right: 10px; /* 버튼과의 간격 */
+  font-weight: 500; /* 이름 볼드 */
+  white-space: nowrap; /* 줄바꿈 방지 */
+  overflow: hidden; /* 넘치는 내용 숨김 */
+  text-overflow: ellipsis; /* ...으로 표시 */
+}
+
+/* 장소 목록 없을 때 메시지 */
+#placeList li#no-places-message { /* `renderPlaceListInModal`에서 id를 'no-places-message'로 설정하면 이 스타일이 적용됩니다. */
+  background: none;
+  box-shadow: none;
+  color: #666;
+  text-align: center;
+  font-style: italic;
+  padding: 1.5rem 1rem;
+}
+
+#placeList li:hover {
+  background-color: rgba(75, 128, 249, 0.1); /* 호버 시 살짝 색상 변화 */
+  color: #4b80f9; /* 호버 시 텍스트 색상 변화 */
+  cursor: pointer; /* 마우스 포인터 변경 */
+}
+
+/* 삭제 버튼 */
+.delete-place-btn {
+  background-color: #ff6b6b; /* 빨간색 계열 */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  flex-shrink: 0; /* 공간이 부족해도 줄어들지 않도록 */
+}
+
+.delete-place-btn:hover {
+  background-color: #ff4757; /* 호버 시 더 진한 빨간색 */
+  transform: translateY(-1px); /* 살짝 올라오는 효과 */
+}
+
+/* 닫기 버튼 */
+#closeModal, #closeSearchModal, #closeSettingsModal {
+  background-color: #4b80f9; /* 메인 테마 색상 */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem; /* 버튼 크기 키우기 */
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1.5rem; /* 위쪽 여백 추가 */
+  max-width: 200px; /* 닫기 버튼의 최대 너비를 200px로 제한  */
+  display: block;   /*  블록 요소로 만들고 margin: auto로 가운데 정렬 */
+  margin-left: auto;
+  margin-right: auto;
+  transition: background-color 0.2s ease-in-out, transform 0.1s;
+  box-shadow: 0 4px 10px rgba(75, 128, 249, 0.3); /* 은은한 그림자 */
+}
+
+#closeModal:hover, #closeSearchModal:hover, #closeSettingsModal:hover {
+  background-color: #3a67d4;
+  transform: translateY(-2px); /* 호버 시 살짝 위로 이동 */
+  box-shadow: 0 6px 12px rgba(75, 128, 249, 0.4); /* 그림자 진해지게 */
+}
+
+#closeModal:active, #closeSearchModal:active, #closeSettingsModal:active {
+  transform: translateY(0); /* 클릭 시 원위치 */
+  box-shadow: 0 2px 5px rgba(75, 128, 249, 0.2);
+}
+
+/* 현재 위치를 표기할 점 스타일 */
+.my-location-dot {
+  width: 18px; /* 화면상 고정된 픽셀 크기 (이동하면서 존재감을 보여줄 크기) */
+  height: 18px;
+  border-radius: 50%; /* 완벽한 원 */
+  background-color: #007bff; /* 파란색 */
+  border: 2px solid white; /* 흰색 테두리로 시인성 확보 */
+  box-shadow: 0 0 8px rgba(0,0,0,0.4); /* 은은한 그림자로 입체감 */
+  /* CustomOverlay의 위치가 이 요소의 중앙이 되도록 translate로 보정 */
+  transform: translate(-50%, -50%); 
+  z-index: 100; /* 항상 지도 위의 다른 요소보다 잘 보이도록 */
+  animation: pulse 1.5s infinite ease-out; /* 부드럽게 깜빡이는 애니메이션 */
+}
+
+/* 내 위치 점 깜빡이 애니메이션 정의 */
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
   }
 }
+  
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* 지도 컨트롤 버튼 (내 위치 이동 버튼) 스타일 */
+.my-location-btn {
+  position: absolute;
+  background-color: #fff; /* 흰색 배경 */
+  border: 1px solid rgba(0,0,0,0.1); /* 옅은 테두리 */
+  border-radius: 50%; /* 원형 버튼 */
+  width: 48px; /* 버튼 크기 */
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* 그림자 효과 */
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  z-index: 100; /* 지도 위에 항상 보이도록 */
 }
 
-.card {
-  padding: 2em;
+/* 내 위치 버튼의 특정 위치 지정 (오른쪽 아래) */
+.my-location-btn {
+  bottom: 20px; /* 아래에서 20px 떨어짐 */
+  right: 20px; /* 오른쪽에서 20px 떨어짐 */
 }
 
-.read-the-docs {
-  color: #888;
+.my-location-btn:hover {
+  background-color: #f5f5f5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.my-location-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.my-location-btn img {
+  width: 28px; /* 아이콘 크기 */
+  height: 28px;
+  filter: brightness(0) invert(0.2); /* 아이콘 색상 조절 (어둡게) */
+}
+
+/* 새로 추가된 앱 설정 모달 스타일 */
+
+.settings-group {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.settings-group:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.settings-group h3 {
+    text-align: center;
+    color: #333;
+    font-size: 1.2rem;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed rgba(0,0,0,0.1);
+    padding-bottom: 8px;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.setting-item input[type="number"] {
+    width: 80px;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: right;
+    font-size: 1rem;
+    background-color: rgba(255,255,255,0.7);
+    color: #333;
+}
+/* 토글 스위치 스타일 */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 28px; /* 둥근 모양 */
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 50%; /* 둥근 버튼 */
+}
+
+input:checked + .slider {
+  background-color: #4b80f9; /* 켜졌을 때 색상 */
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #4b80f9;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(22px);
+  -ms-transform: translateX(22px);
+  transform: translateX(22px);
+}
+
+.close-settings-btn {
+  background-color: #4b80f9;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  max-width: 200px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  transition: background-color 0.2s ease-in-out, transform 0.1s;
+  box-shadow: 0 4px 10px rgba(75, 128, 249, 0.3);
+}
+
+.close-settings-btn:hover {
+  background-color: #3a67d4;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(75, 128, 249, 0.4);
+}
+
+.close-settings-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(75, 128, 249, 0.2);
+}
+
+/* 마커 위에 표시되는 장소 이름 CustomOverlay 스타일 */
+.marker-name-overlay {
+  display: block; /* 블록 요소로 */
+  background-color: #007bff; /* 파란색 배경 */
+  color: white; /* 흰색 글자 */
+  padding: 5px 10px; /* 내부 여백 */
+  border-radius: 5px; /* 둥근 모서리 */
+  font-size: 0.9rem; /* 글자 크기 */
+  font-weight: bold; /* 글자 굵게 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2); /* 그림자 효과 */
 }

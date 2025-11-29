@@ -10,18 +10,18 @@ window.onload = function () {
     level: 3
   });
 
-  // ✨✨✨ 여기에 현재 위치를 한 번 가져와서 지도 중심 설정하는 로직 추가 ✨✨✨
+  // 페이지 로드 시 사용자의 현재 위치로 지도 중심을 재설정
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       function(position) {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         const userPosition = new kakao.maps.LatLng(lat, lng);
-        map.setCenter(userPosition); // ✨✨ 성공하면 내 위치로 지도의 중심을 재설정 ✨✨
+        map.setCenter(userPosition); // 지도 중심을 현재 위치로 설정
         console.log("지도 중심을 현재 위치로 초기 설정했습니다:", lat, lng);
       },
       function(error) {
-        // 위치 가져오기 실패해도 망포역으로 지도가 열리므로 사용자에게는 영향 없음
+        // 위치 정보 가져오기 실패 시 기본 위치(망포역) 사용
         console.warn("최초 위치 가져오기 실패. 기본 중심(망포역)을 사용합니다.", error);
       },
       {
@@ -39,7 +39,6 @@ window.onload = function () {
   let userPlaces = [];
   // 현재 지도에 표시된 마커들을 관리할 배열
   const currentMarkers = [];
-  // `isInitialCenterSet` 플래그는 사용되지 않아 제거했습니다. 지도는 watchPosition에 따라 계속 움직입니다.
 
   // 현재 지도에 표시된 반경 원 객체
   let currentRadiusCircle = null; 
@@ -47,7 +46,10 @@ window.onload = function () {
   // 지도에 열려 있는 인포윈도우 객체
   let currentOpenInfowindow = null; 
 
-  // 🎛️ 주요 DOM 요소들을 미리 가져오기
+  // 현재 지도에 열려 있는 이름 CustomOverlay (마커 클릭 시 이름 표시용)
+  let currentNameOverlay = null;
+
+  // 주요 DOM 요소들을 미리 가져오기
   const menuToggleButton = document.getElementById('menuToggleButton');
   const mainMenu = document.getElementById('mainMenu');
   // const mainMenu = document.querySelector('nav.main-menu');
@@ -133,7 +135,7 @@ window.onload = function () {
 
 
 
-    // 📍 설정값 저장을 위한 전역 변수 (기본값 설정)
+  // 설정값 저장을 위한 전역 변수 (기본값 설정)
   let appSettings = {
     defaultRadius: 1000,      // 기본 알림 반경 (미터)
     notifyOnEnter: true,      // 진입 시 알림 여부
@@ -217,9 +219,6 @@ window.onload = function () {
       appSettings.notifyOnExit = notifyOnExitToggle.checked;
     }
   }
-
-
-
   
   /**
    * 지도에 표시된 모든 마커를 지우고 배열을 비웁니다.
@@ -234,6 +233,12 @@ window.onload = function () {
   /**
    * userPlaces 배열의 장소들을 지도에 마커로 표시합니다.
    */
+  /**
+   * userPlaces 배열의 장소들을 지도에 마커로 표시합니다.
+   */
+  /**
+   * userPlaces 배열의 장소들을 지도에 마커로 표시합니다.
+   */
   function displayPlacesOnMap() {
     clearMarkers();
 
@@ -243,16 +248,33 @@ window.onload = function () {
       marker.setMap(map);
       currentMarkers.push(marker);
 
-      const infowindow = new kakao.maps.InfoWindow({
-        content: `<div style="padding:5px; white-space: nowrap;">${place.name}</div>`
-      });
-      // 마커 클릭 시 인포윈도우 표시
+      // ✨✨ 마커 클릭 시 이름 CustomOverlay 표시 로직 ✨✨
       kakao.maps.event.addListener(marker, 'click', () => {
-        if (currentOpenInfowindow) {
-          currentOpenInfowindow.close();
+        // 1. 먼저 장소로 이동하고 반경을 그리는 함수 호출 (기존과 동일)
+        moveMapToPlace(place.id); 
+
+        // 2. 이전에 열려있던 이름 CustomOverlay가 있다면 닫아준다.
+        if (currentNameOverlay) {
+          currentNameOverlay.setMap(null); // 지도에서 제거
+          currentNameOverlay = null;
         }
-        infowindow.open(map, marker);
-        currentOpenInfowindow = infowindow;
+        
+        // 3. 새 이름 CustomOverlay를 생성하고 지도에 표시한다.
+        currentNameOverlay = new kakao.maps.CustomOverlay({
+            map: map, // 지도 객체
+            position: latlng, // 마커와 동일한 위치에
+            content: `<div class="marker-name-overlay">${place.name}</div>`, // ✨✨ 이름과 스타일 클래스! ✨✨
+            yAnchor: 2.2, // ✨✨ 마커 아이콘 바로 위로 오도록 y축 앵커 조정! (마커 높이에 따라 조정 필요) ✨✨
+            zIndex: 3 // 마커, 반경 위로 표시되도록 z-index 설정 (반경 z-index: 2로 가정)
+        });
+        currentNameOverlay.setMap(map); // 지도에 추가
+
+        // 이전에 사용하던 Infowindow는 이제 필요 없어지지만,
+        // 혹시 모를 상황을 위해 기존 코드 유지 (currentOpenInfowindow도 닫힘)
+        if (currentOpenInfowindow) { 
+          currentOpenInfowindow.close(); 
+          currentOpenInfowindow = null;
+        }
       });
     });
   }
@@ -308,6 +330,7 @@ window.onload = function () {
     if (foundPlace) {
       const latlng = new kakao.maps.LatLng(foundPlace.lat, foundPlace.lng);
       map.setCenter(latlng); // 지도를 해당 장소의 위치로 이동
+      map.setLevel(3); // 적절한 확대 레벨로 설정 (필요시 조정 가능)
       console.log(`'${foundPlace.name}'(으)로 지도를 이동했습니다.`);
       
       closeAllUIElements(); // ✨✨ 지도 이동 시 모든 UI 요소 닫기 ✨✨ (핵심!)
@@ -413,11 +436,18 @@ window.onload = function () {
       currentOpenInfowindow.close();
       currentOpenInfowindow = null;
     }
-    // 반경 원도 제거
-    if (currentRadiusCircle) {
-      currentRadiusCircle.setMap(null);
-      currentRadiusCircle = null;
+
+    // ✨✨ 현재 열려있는 이름 CustomOverlay도 닫기! ✨✨
+    if (currentNameOverlay) {
+      currentNameOverlay.setMap(null);
+      currentNameOverlay = null;
     }
+
+    // // 반경 원도 제거
+    // if (currentRadiusCircle) {
+    //   currentRadiusCircle.setMap(null);
+    //   currentRadiusCircle = null;
+    // }
   }
 
 
@@ -633,7 +663,7 @@ window.onload = function () {
       const listItem = document.createElement('li');
       listItem.setAttribute('data-id', place.id);
       listItem.innerHTML = `
-        <span>${place.name}</span>
+        <span class="search-result-name">${place.name}</span>
         <button class="delete-place-btn" data-id="${place.id}">삭제</button>
       `;
       searchResultsListUl.appendChild(listItem);
@@ -644,9 +674,9 @@ window.onload = function () {
     if (!searchResultsListUl.dataset.hasClickListener) {
       searchResultsListUl.addEventListener('click', (e) => {
         // 장소 이름 클릭 시 지도 이동
-        if (e.target.tagName === 'SPAN') {
+        if (e.target.classList.contains('search-result-name')) { // ✨✨ 클래스 이름으로 타겟 확인! ✨✨
           const placeId = e.target.closest('li').dataset.id;
-          moveMapToPlace(placeId);
+          moveMapToPlace(placeId); // ✨✨ 이 함수가 반경을 그려줄 거야! ✨✨
           // 검색 모달 닫기 (사용자가 장소를 선택했으니)
           if (searchModal) {
               searchModal.style.display = 'none';
@@ -770,6 +800,7 @@ window.onload = function () {
             const lng = position.coords.longitude;
             const userPosition = new kakao.maps.LatLng(lat, lng);
             map.setCenter(userPosition); // 지도를 현재 위치로 이동
+            map.setLevel(3); // 확대 레벨 조정 (필요시 변경 가능)
             console.log('지도 현재 위치로 이동 완료:', lat, lng);
             // 내 위치 표시 오버레이 업데이트
             if (myLocationOverlay) {
@@ -815,40 +846,40 @@ window.onload = function () {
   }
 
     // 새로 추가된 함수: 지도 이동 및 모달 닫기
-  function moveMapToPlace(placeId) {
-    const foundPlace = userPlaces.find(place => place.id === placeId);
-    if (foundPlace) {
-      const latlng = new kakao.maps.LatLng(foundPlace.lat, foundPlace.lng);
-      map.setCenter(latlng); // 지도를 해당 장소의 위치로 이동
-      console.log(`'${foundPlace.name}'(으)로 지도를 이동했습니다.`);
+  // function moveMapToPlace(placeId) {
+  //   const foundPlace = userPlaces.find(place => place.id === placeId);
+  //   if (foundPlace) {
+  //     const latlng = new kakao.maps.LatLng(foundPlace.lat, foundPlace.lng);
+  //     map.setCenter(latlng); // 지도를 해당 장소의 위치로 이동
+  //     console.log(`'${foundPlace.name}'(으)로 지도를 이동했습니다.`);
       
-      // 이전 반경 원이 있다면 지도에서 제거
-      if (currentRadiusCircle) {
-        currentRadiusCircle.setMap(null);
-        currentRadiusCircle = null; // null로 설정하여 참조 해제
-      }
+  //     // 이전 반경 원이 있다면 지도에서 제거
+  //     if (currentRadiusCircle) {
+  //       currentRadiusCircle.setMap(null);
+  //       currentRadiusCircle = null; // null로 설정하여 참조 해제
+  //     }
 
-      // 새 반경 원 생성 및 지도에 표시
-      currentRadiusCircle = new kakao.maps.Circle({
-        map: map, // 지도 객체
-        center: latlng, // 원의 중심 좌표
-        radius: foundPlace.radius, // 원의 반지름 (미터 단위)
-        strokeWeight: 2, // 선의 두께
-        strokeColor: '#007BFF', // 선의 색깔 (파란색 계열)
-        strokeOpacity: 0.8, // 선의 불투명도
-        strokeStyle: 'solid', // 선의 스타일
-        fillColor: '#007BFF', // 채우기 색깔
-        fillOpacity: 0.2 // 채우기 불투명도
-      });
+  //     // 새 반경 원 생성 및 지도에 표시
+  //     currentRadiusCircle = new kakao.maps.Circle({
+  //       map: map, // 지도 객체
+  //       center: latlng, // 원의 중심 좌표
+  //       radius: foundPlace.radius, // 원의 반지름 (미터 단위)
+  //       strokeWeight: 2, // 선의 두께
+  //       strokeColor: '#007BFF', // 선의 색깔 (파란색 계열)
+  //       strokeOpacity: 0.8, // 선의 불투명도
+  //       strokeStyle: 'solid', // 선의 스타일
+  //       fillColor: '#007BFF', // 채우기 색깔
+  //       fillOpacity: 0.2 // 채우기 불투명도
+  //     });
 
-      // 모달이 열려 있다면 닫기
-      if (placeModal && placeModal.style.display === 'flex') {
-        placeModal.style.display = 'none';
-      }
-    } else {
-      console.warn(`ID ${placeId}를 가진 장소를 찾을 수 없습니다.`);
-    }
-  }
+  //     // 모달이 열려 있다면 닫기
+  //     if (placeModal && placeModal.style.display === 'flex') {
+  //       placeModal.style.display = 'none';
+  //     }
+  //   } else {
+  //     console.warn(`ID ${placeId}를 가진 장소를 찾을 수 없습니다.`);
+  //   }
+  // }
 
 
   /* =========================================================

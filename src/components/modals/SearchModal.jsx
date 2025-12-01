@@ -110,7 +110,7 @@ function SearchModal({ isOpen, onClose, userPlaces, deletePlace, mapRef, current
             type="text"
             id="keyword"
             placeholder="장소 이름을 검색하세요..."
-            autocomplete="off"
+            autoComplete="off"
             value={keyword}
             onChange={handleKeywordChange}
             onKeyPress={(e) => { // Enter 키 입력 시 검색

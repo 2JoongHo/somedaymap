@@ -85,12 +85,7 @@ function Header({ openPlaceModal, openSearchModal, openSettingsModal, closeAllMo
         onClick={handleMenuToggle}
         ref={menuButtonRef} // 버튼에 ref 연결
       >
-        {/* 이미지 경로 조정: public 폴더 기준으로 접근하거나, App.jsx에서 import하여 전달해야 한다. */}
-        {/* 지금은 없다고 가정하고, 나중에 에셋 추가 시 수정 */}
-        {/* <img src="/assets/icon/menuIcon.svg" alt="메뉴" /> */}
-        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 6H20M4 12H20M4 18H20" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg> {/* 임시 SVG 아이콘 */}
+        <img src="./public/asset/icons/menuIcon.svg" alt="메뉴" />
       </button>
 
       {/* 검색 버튼 */}
@@ -100,11 +95,7 @@ function Header({ openPlaceModal, openSearchModal, openSettingsModal, closeAllMo
         onClick={handleSearchButtonClick}
       >
         {/* 이미지 경로 조정 */}
-        {/* <img src="/assets/icon/searchIcon3.svg" alt="검색" /> */}
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M21 21L16.65 16.65" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg> {/* 임시 SVG 아이콘 */}
+        <img src="/asset/icons/searchIcon3.svg" alt="검색" />
       </button>
 
       {/* 상단 메뉴창 (드롭다운) */}

@@ -1,10 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>somedaymap</title>
+    <title>언제갈지도 | SomedayMap</title>
+
+    <!-- 🔑 [최종 확정!] Kakao 지도 API 스크립트 - defer, async 없이 <head>에 직접 로드 -->
+    <!-- YOUR_KAKAO_APP_KEY_HERE 부분을 네 실제 JavaScript 키로 교체하세요! (필수!) -->
+    <!-- 이 방식이 document.write 에러 없이 가장 안정적으로 로드됩니다. -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=6769ff1e824932a4aba8297bb6eab4df&libraries=services,clusterer"></script>
+    
   </head>
   <body>
     <div id="root"></div>

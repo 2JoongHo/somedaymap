@@ -85,11 +85,7 @@ function FloatingButtons({ mapRef, myLocationOverlayRef, closeAllModals }) {
         onClick={handleMoveToCurrentLocation}
       >
         {/* 이미지 경로 조정 */}
-        {/* <img src="/assets/icon/locationIcon.svg" alt="내 위치로 이동" /> */}
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg> {/* 임시 SVG 아이콘 */}
+        <img src="/asset/icons/locationIcon.svg" alt="내 위치로 이동" />
       </button>
 
       {/* 로딩 메시지 DOM (일반적으로는 Global UI Context나 Portal을 통해 관리) */}

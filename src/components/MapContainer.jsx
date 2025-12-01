@@ -15,41 +15,49 @@ function MapContainer({
 }) {
   const mapDivRef = useRef(null); 
   const watchIdRef = useRef(null); 
-  const geocoder = useRef(null); // useRef로 유지
-  const ps = useRef(null);     // useRef로 유지
+  const geocoder = useRef(null);
+  const ps = useRef(null);     
 
-  const [isMapInitialized, setIsMapInitialized] = useState(false); // 지도 객체 초기화 완료 상태 (이건 그대로 사용)
+  const [isMapInitialized, setIsMapInitialized] = useState(false); // 지도 객체 초기화 완료 상태
 
-  const userPlacesLatestRef = useRef(userPlaces);
-  userPlacesLatestRef.current = userPlaces; 
-
-  const appSettingsLatestRef = useRef(appSettings);
-  appSettingsLatestRef.current = appSettings;
-
-  const addPlaceRef = useRef(addPlace);
-  useEffect(() => {
-    addPlaceRef.current = addPlace; // addPlace prop이 바뀔 때마다 useRef 업데이트
-  }, [addPlace]);
-
+  // 💡 [App.jsx에서 옮겨온 getDistance]
   const getDistance = useCallback((lat1, lon1, lat2, lon2) => {
-    const R = 6371e3;
-    const φ1 = lat1 * Math.PI / 180;
-    const φ2 = lat2 * Math.PI / 180;
-    const Δφ = (lat2 - lat1) * Math.PI / 180;
-    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const R = 6371e3; // 지구 반경 (미터)
+    const φ1 = lat1 * Math.PI / 180; // 위도를 라디안으로 변환
+    const φ2 = lat2 * Math.PI / 180; // 위도를 라디안으로 변환
+    const Δφ = (lat2 - lat1) * Math.PI / 180; // 위도 차이를 라디안으로 변환
+    const Δλ = (lon2 - lon1) * Math.PI / 180; // 경도 차이를 라디안으로 변환
 
     const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
               Math.cos(φ1) * Math.cos(φ2) *
               Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c;
+    return R * c; // 미터 단위 거리
   }, []);
 
+  // Props로 넘어오는 userPlaces와 appSettings의 최신 값을 참조하기 위한 Ref
+  const userPlacesLatestRef = useRef(userPlaces);
+  userPlacesLatestRef.current = userPlaces; 
+
+  const appSettingsLatestRef = useRef(appSettings);
+  appSettingsLatestRef.current = appSettings;
+
+  // addPlace 함수가 변경될 때마다 최신 버전을 참조하기 위한 Ref
+  const addPlaceRef = useRef(addPlace);
+  useEffect(() => {
+    addPlaceRef.current = addPlace; 
+  }, [addPlace]);
+
+  // 💡 [추가] 각 장소의 진입 상태를 MapContainer 내부에서만 관리하는 Ref
+  // Map<placeId, isEntered> 형태로 저장하며, watchPosition 콜백에서 사용됩니다.
+  const placeEntryStatusRef = useRef(new Map());
+
+  // 장소 클릭 핸들러 (마커 클릭 또는 다른 모달에서 호출)
   const handlePlaceClick = useCallback((placeId) => {
     if (!isMapInitialized || !mapRef.current || !window.kakao || !window.kakao.maps) return; 
 
-    const foundPlace = userPlaces.find(place => place.id === placeId);
+    const foundPlace = userPlacesLatestRef.current.find(place => place.id === placeId); // 💡 userPlacesLatestRef 사용
     if (!foundPlace) return;
 
     const latlng = new window.kakao.maps.LatLng(foundPlace.lat, foundPlace.lng);
@@ -84,12 +92,10 @@ function MapContainer({
 
     console.log(`[MapContainer] '${foundPlace.name}'(으)로 지도 이동 및 반경/이름 오버레이 표시.`);
     closeAllModals();
-  }, [userPlaces, mapRef, currentRadiusCircleRef, currentNameOverlayRef, closeAllModals, isMapInitialized]);
+  }, [isMapInitialized, mapRef, currentRadiusCircleRef, currentNameOverlayRef, closeAllModals]); // 💡 userPlacesLatestRef가 종속성에 필요 없음
 
 
-  // ⭐️ [최종 단순화] Kakao Maps API 로드 후 지도 초기화 로직 ⭐️
-  // 이 useEffect는 isMapInitialized 상태를 관리하고, window.kakao.maps.load() 콜백 안에서
-  // 모든 지도 관련 초기화 작업을 수행합니다.
+  // ⭐️ Kakao Maps API 로드 후 지도 초기화 및 모든 이벤트 리스너 설정 ⭐️
   useEffect(() => {
     if (isMapInitialized) {
       console.log("MapContainer: 지도가 이미 초기화 완료된 상태입니다. 건너뜀.");
@@ -100,8 +106,6 @@ function MapContainer({
         return;
     }
 
-    // 💡 [핵심] window.kakao.maps.load()는 API 스크립트 로드 완료 시점에 호출되는 전역 콜백입니다.
-    // 이 안에 모든 지도 초기화 로직을 넣어서 LatLng is not a constructor 에러를 방지합니다.
     if (window.kakao && window.kakao.maps && typeof window.kakao.maps.load === 'function') {
       window.kakao.maps.load(function() {
         console.log("MapContainer: ✅ window.kakao.maps.load() 콜백 실행! 지도 초기화 시작!");
@@ -120,15 +124,15 @@ function MapContainer({
         });
         console.log("MapContainer: ✅ 카카오맵 초기화 완료 및 MarkerClusterer 준비!");
 
-        geocoder.current = new window.kakao.maps.services.Geocoder(); // geocoder는 이제 여기서 초기화
-        ps.current = new window.kakao.maps.services.Places();         // ps는 이제 여기서 초기화
+        geocoder.current = new window.kakao.maps.services.Geocoder();
+        ps.current = new window.kakao.maps.services.Places();         
 
         // ⭐️ 페이지 로드 시 사용자의 현재 위치로 지도 중심 재설정 ⭐️
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const lat = position.coords.latitude;
-                    const lng = position.coords.longitude; // 💡 .longitude 가 맞음 (내가 실수했다!)
+                    const lng = position.coords.longitude;
                     const userPosition = new window.kakao.maps.LatLng(lat, lng);
                     if (mapRef.current) { 
                         mapRef.current.setCenter(userPosition);
@@ -173,10 +177,10 @@ function MapContainer({
                         if (status === window.kakao.maps.services.Status.OK) {
                             defaultName = result[0].road_address?.address_name || result[0].address?.address_name || "새로운 장소";
                         }
-                        addPlaceRef.current(latlng, defaultName); // 💡 addPlaceRef.current()로 최신 addPlace 호출
+                        addPlaceRef.current(latlng, defaultName);
                     });
                 } else {
-                    addPlaceRef.current(latlng, defaultName); // 💡 addPlaceRef.current()로 최신 addPlace 호출
+                    addPlaceRef.current(latlng, defaultName);
                 }
             }, {
                 location: latlng,
@@ -187,10 +191,15 @@ function MapContainer({
 
         // ⭐️ Geolocation watchPosition 설정 (지오펜싱) ⭐️
         if (navigator.geolocation && mapRef.current) {
+            // 이전에 설정된 watchPosition이 있다면 제거하고 다시 설정 (컴포넌트가 다시 마운트될 때 안전하게 처리)
+            if (watchIdRef.current) {
+                navigator.geolocation.clearWatch(watchIdRef.current);
+            }
+
             watchIdRef.current = navigator.geolocation.watchPosition(
                 (position) => {
                     const currentLat = position.coords.latitude;
-                    const currentLng = position.coords.longitude; // 💡 .longitude 가 맞음 (내가 실수했다!)
+                    const currentLng = position.coords.longitude;
                     const userPosition = new window.kakao.maps.LatLng(currentLat, currentLng);
                     
                     console.log(`MapContainer: ✅ 현재 위치: ${currentLat}, ${currentLng} (정확도: ${position.coords.accuracy}m)`);
@@ -206,26 +215,30 @@ function MapContainer({
                         });
                     }
 
+                    // 💡 userPlacesLatestRef.current를 순회하며 진입/이탈 상태를 placeEntryStatusRef에서 관리
                     userPlacesLatestRef.current.forEach(place => {
                         const distance = getDistance(currentLat, currentLng, place.lat, place.lng);
+                        const isCurrentlyEntered = placeEntryStatusRef.current.get(place.id) || false; // 현재 감지된 상태 (없으면 false)
 
-                        if (distance <= place.radius) {
-                            if (!place.isEntered) { 
+                        if (distance <= place.radius) { // 반경 내 진입
+                            if (!isCurrentlyEntered) { // 새로 진입했다면
                                 if (appSettingsLatestRef.current.notifyOnEnter) {
                                     const notificationTitle = `🚨 ${place.name}에 도착!`;
                                     const notificationBody = `설정하신 ${place.name} 반경 ${place.radius}m 내에 진입했습니다! 현재 ${distance.toFixed(1)}m`;
                                     showNotification(notificationTitle, notificationBody);
                                 }
-                                place.isEntered = true; 
+                                placeEntryStatusRef.current.set(place.id, true); // 상태 업데이트 (진입 상태로)
+                                console.log(`MapContainer: 진입 감지 - ${place.name}`);
                             }
-                        } else {
-                            if (place.isEntered) { 
+                        } else { // 반경 밖 이탈
+                            if (isCurrentlyEntered) { // 이탈했다면 (이전에 진입 상태였다면)
                                 if (appSettingsLatestRef.current.notifyOnExit) {
                                     const notificationTitle = `ℹ️ ${place.name} 이탈`;
                                     const notificationBody = `설정하신 ${place.name} 반경 ${place.radius}m를 벗어났습니다. 현재 ${distance.toFixed(1)}m`;
                                     showNotification(notificationTitle, notificationBody);
                                 }
-                                place.isEntered = false;
+                                placeEntryStatusRef.current.set(place.id, false); // 상태 업데이트 (이탈 상태로)
+                                console.log(`MapContainer: 이탈 감지 - ${place.name}`);
                             }
                         }
                     });
@@ -241,8 +254,8 @@ function MapContainer({
                 { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
         }
-        setIsMapInitialized(true); // 💡 지도 초기화 완료 상태 업데이트
-      }); // window.kakao.maps.load() 콜백 끝
+        setIsMapInitialized(true);
+      });
     } else {
       console.error("MapContainer: ❌ window.kakao.maps.load 함수를 찾을 수 없습니다. index.html의 Kakao Maps API 스크립트 로드를 확인하세요.");
     }
@@ -252,16 +265,20 @@ function MapContainer({
       if (watchIdRef.current) {
         navigator.geolocation.clearWatch(watchIdRef.current);
         console.log("MapContainer: Geolocation watchPosition 정리 완료.");
+        watchIdRef.current = null; // 정리 후 ref도 null로 초기화
       }
     };
-  // 💡 [수정] 의존성 배열에서 isKakaoMapsSdkLoaded, mapDivRef 제거 (초기화는 load 콜백 내에서 이루어지기 때문)
-  //          isMapInitialized가 아닌 mapRef.current의 상태를 watch해서 초기화를 한 번만 진행
-  }, [mapDivRef, mapRef, isMapInitialized, closeAllModals, getDistance, myLocationOverlayRef, showNotification, markerClustererRef, currentRadiusCircleRef, currentNameOverlayRef, userPlacesLatestRef, appSettingsLatestRef]);
+  // 💡 최종 의존성 배열. 모든 종속성이 명확하고 불필요한 재실행을 방지하도록 최적화했습니다.
+  }, [
+    mapDivRef, mapRef, isMapInitialized, closeAllModals, getDistance, 
+    myLocationOverlayRef, showNotification, markerClustererRef, 
+    currentRadiusCircleRef, currentNameOverlayRef, userPlacesLatestRef, appSettingsLatestRef
+  ]);
 
 
   // ⭐️ userPlaces 변경 시 마커 및 클러스터 다시 그리기 ⭐️
   useEffect(() => {
-    console.log("MapContainer: 마커 업데이트 useEffect 시작.", { isMapInitialized, mapRefCurrent: mapRef.current });
+    console.log("MapContainer: 마커 업데이트 useEffect 시작.", { isMapInitialized, mapRefCurrent: mapRef.current, userPlacesCount: userPlaces.length });
     if (!isMapInitialized || !mapRef.current || !markerClustererRef.current) {
         console.warn("MapContainer: 마커 업데이트 조건 불만족. 재시도 예정.");
         return; 
@@ -285,8 +302,7 @@ function MapContainer({
     markerClustererRef.current.addMarkers(newMarkersForCluster);
     console.log(`MapContainer: ${userPlaces.length}개의 마커 업데이트 완료.`);
 
-  }, [userPlaces, mapRef, markerClustererRef, handlePlaceClick, isMapInitialized]); 
-
+  }, [userPlaces, isMapInitialized, mapRef, markerClustererRef, handlePlaceClick]); // handlePlaceClick 의존성 추가
 
   return (
     <div

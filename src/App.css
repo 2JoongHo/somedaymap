@@ -34,57 +34,51 @@ body {
 
 /* 언제갈지도 로고와 헤더 */
 header {
-  position: absolute;
+  position: fixed; /* 헤더는 스크롤해도 항상 상단에 고정 */
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
-  background-color: rgba(255, 255, 255, 0.4); /* 살짝 투명한 하양 */
-  color: #ffa500;
+  height: 60px; /* 헤더 높이 고정 */
+  background-color: rgba(255, 255, 255, 0.6); /* 살짝 투명한 배경 */
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  /* padding: 0 1rem; // 이 주석을 풀면 양쪽에 여백이 생깁니다 */
-  z-index: 100;
-  backdrop-filter: blur(4px); /* 배경 블러 효과 */
-  -webkit-backdrop-filter: blur(4px); /* Safari 대응 */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15); /* 🌫️ 자연스러운 그림자 */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* 미세한 경계선 */
+  justify-content: space-between; /* 요소들을 양 끝으로 배치 */
+  padding: 0 1rem; /* 좌우 패딩 */
+  z-index: 1000; /* 가장 위에 오도록 */
+  backdrop-filter: blur(4px); /* 블러 효과 */
+  -webkit-backdrop-filter: blur(4px); /* Safari용 */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 그림자 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* 하단 경계선 */
 }
 
 header h1 {
-  flex-grow: 1;
-  text-align: center;
-  margin: 0;  /* 기본 마진 제거 */
-  padding: 0; /* 기본 패딩 제거 */
-  position: absolute; /* 중앙 정렬을 위해 절대 위치 지정 */
+  /* 로고 텍스트 중앙 정렬 */
+  position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  /* width: auto; */
+  margin: 0;
+  padding: 0;
   white-space: nowrap;
-  z-index: 1;
+  z-index: 1; /* 버튼 아래에 배치 */
 }
 
 header h1 span {
-  font-size: 2rem;    /* 로고 텍스트 크기 키우기 */
-  font-weight: 700;   /* 볼드 처리 */
-  color: orange;    /* 텍스트 색상을 주황색으로 */
-  line-height: 1;     /* 텍스트 줄 간격 조정 */
+  font-size: 2rem;
+  font-weight: 700;
+  color: orange;
+  line-height: 1;
+  display: inline-block;
 }
 
 .h1-gal {
   color: #f5374d;
 }
 
-/* 좌측 상단 메뉴 */
-.main-menu {
+/* 메뉴 토글 버튼 (좌측 상단) */
+.menu-toggle-btn {
   position: absolute;
-  top: 75px;        /* header 바로 아래 */
+  top: 0px;
   left: 0px;
-  z-index: 3000;    /* header보다 높게 */
-  }
-
-.menu-toggle-btn { /* 메뉴 토글 버튼 스타일 */
   background: none;
   border: none;
   cursor: pointer;
@@ -102,10 +96,80 @@ header h1 span {
 }
 
 .menu-toggle-btn img {
-  width: 50px; /* 아이콘 크기는 기존과 동일하게 */
-  height: 50px;
+  width: 40px;
+  height: 40px;
   filter: brightness(0) saturate(100%) invert(63%) sepia(97%) saturate(749%) hue-rotate(-1deg) brightness(103%) contrast(103%);
 }
+
+/* ⭐️ 좌측 드롭다운 메뉴 본체 (사이드바 스타일) ⭐️ */
+.main-menu {
+  position: fixed; /* 화면에 고정, 스크롤되지 않음 */
+  top: 0;
+  left: 0;
+  height: 100vh; /* 뷰포트 전체 높이 */
+  width: 250px; /* 메뉴의 너비 */
+  background-color: rgba(255, 255, 255, 0.95); /* 배경색 */
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2); /* 그림자 */
+  z-index: 999; /* 헤더보다 살짝 낮게 배치하여 겹치지 않도록 */
+  transform: translateX(-100%); /* 기본적으로 왼쪽 화면 밖으로 완전히 숨김 */
+  transition: transform 0.3s ease-out; /* 부드러운 슬라이드 애니메이션 */
+  overflow-y: auto; /* 메뉴 내용이 길어지면 스크롤 가능 */
+  padding-top: 60px; /* 헤더 높이만큼 패딩을 주어 헤더와 겹치지 않도록 */
+  box-sizing: border-box; /* 패딩이 너비/높이에 포함되도록 */
+  display: flex; /* 내부 요소들을 Flexbox로 정렬 */
+  flex-direction: column; /* 세로 방향으로 정렬 */
+}
+
+/* 'show' 클래스가 추가되면 메뉴를 화면 안으로 슬라이드 */
+.main-menu.show {
+  transform: translateX(0);
+}
+
+
+/* 메뉴 아이템 리스트 (UL 태그) */
+.main-menu ul.menu-items { /* .main-menu 내부의 ul.menu-items */
+  list-style: none; /* 기본 리스트 스타일 제거 */
+  margin: 0;
+  padding: 0;
+  width: 100%; /* 부모 .main-menu의 너비를 가득 채움 */
+}
+
+/* 각 메뉴 아이템 (LI 태그) */
+.main-menu ul.menu-items li {
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* 아이템 구분선 */
+}
+
+.main-menu ul.menu-items li:last-child {
+  border-bottom: none; /* 마지막 아이템은 구분선 제거 */
+}
+
+/* 각 메뉴 아이템 내부 버튼 */
+.main-menu ul.menu-items li button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%; /* 버튼이 li의 너비를 가득 채움 */
+  padding: 1rem 1.5rem; /* 버튼 내부 패딩 */
+  text-align: left; /* 텍스트를 왼쪽으로 정렬 */
+  color: #333; /* 기본 텍스트 색상 */
+  font-size: 1.1rem; /* 폰트 크기 */
+  transition: background-color 0.2s, color 0.2s; /* 호버/활성화 시 부드러운 전환 */
+  display: block; /* 버튼을 블록 레벨 요소로 */
+}
+
+.main-menu ul.menu-items li button:hover {
+  background-color: rgba(75, 128, 249, 0.1); /* 호버 시 배경색 변경 */
+  color: #4b80f9; /* 호버 시 텍스트 색상 변경 */
+}
+
+.main-menu ul.menu-items li button:active {
+  transform: scale(0.98); /* 클릭 시 살짝 축소 효과 */
+  background-color: rgba(75, 128, 249, 0.25);
+  color: #2c52ed;
+}
+
 
 
 .search-toggle-btn { /* 메뉴 토글 버튼 스타일 */
@@ -212,11 +276,11 @@ header h1 span {
   border-radius: 8px; /* 둥근 모서리 */
   font-size: 1rem; /* 글자 크기 */
   /* placeholder 글자 색상 조절 (선택 사항) */
-  color: #333; /* 기본 글자 색상 */
+  color: #ffffff; /* 기본 글자 색상 */
 }
 
 #keyword::placeholder {
-  color: #999;
+  color: #ffffff;
 }
 
 /* 검색 버튼 (#searchBtn) 스타일 */
@@ -233,72 +297,6 @@ header h1 span {
 
 #searchBtn:hover {
   background-color: #0056b3; /* 호버 시 색상 변경 */
-}
-
-/* 드롭다운으로 나올 메뉴 리스트 스타일 */
-.menu-items {
-  display: none; /* 기본적으로 숨겨져 있음 */
-  position: absolute;
-
-
-  background: rgba(255, 255, 255, 0.7); /* 살짝 투명한 흰색 배경 */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  list-style: none;
-  padding: 8px;
-  margin: 0;
-  z-index: 3001; /* 헤더보다는 낮지만, 콘텐츠보다는 위에 */
-  max-width: calc(100vw - 2rem - 20px);
-  width: max-content;
-  box-sizing: border-box;
-  text-align: right; /* 메뉴 아이템 버튼들을 왼쪽으로 정렬 */
-  opacity: 10;  /* 초기 상태에서 투명도 설정 */
-  transform: translateY(-13px); /* 초기 상태에서 약간 위로 이동 */
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-/* .menu-items에 .show 클래스가 붙었을 때 (JS로 제어) */
-.menu-items.show {
-  display: block;
-  opacity: 1;
-  /* transform: translateY(0); */
-}
-
-.menu-items li {
-  padding: 0px;
-  margin: 4px;
-  display: block; /* 각 아이템을 세로로 정렬 */
-}
-
-.menu-items li:last-child {
-  margin-bottom: 0; /* 마지막 아이템은 아래 간격 제거 */
-}
-
-.menu-items li button {
-  background: none; /* 배경 없음 */
-  border: none;
-  cursor: pointer;
-  width: 100%; /* 버튼이 li 너비를 꽉 채우도록 */
-  padding: 10px 12px; /* 버튼 클릭 영역 및 내부 여백 */
-  border-radius: 8px;
-  transition: background-color 0.2s, color 0.2s; /* 호버 시 색상 전환 */
-  text-align: center; /* 텍스트만 있으니 왼쪽 정렬! */
-  color: orange; /* 텍스트 색상 */
-  font-size: 1rem; /* 폰트 크기 조정 */
-}
-
-.menu-items li button:hover {
-  background-color: rgba(75, 128, 249, 0.1); /* 호버 시 살짝 색상 변화 */
-  color: #4b80f9; /* 호버 시 텍스트 색상 변화 */
-  cursor: pointer; /* 마우스 포인터 변경 */
-}
-
-.menu-items li button:active {
-  transform: scale(0.98); /* 클릭 시 살짝 작아지는 효과 */
-  background-color: rgba(75, 128, 249, 0.25);
-  color: #2c52ed;
 }
   
 /* 지도 표기 */

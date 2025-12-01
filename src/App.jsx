@@ -57,7 +57,26 @@ function showNotification(title, body) {
 
 function App() {
   // 📍 앱의 핵심 상태 관리
-  const [userPlaces, setUserPlaces] = useState([]);
+  // 💡 userPlaces 초기값 로딩 방식을 appSettings와 동일하게 개선
+  const [userPlaces, setUserPlaces] = useState(() => {
+    console.log('localStorage에서 userPlaces 초기 로딩 시도...');
+    const storedPlaces = localStorage.getItem('언제갈지도_places');
+    if (storedPlaces) {
+      try {
+        const parsedPlaces = JSON.parse(storedPlaces);
+        // isEntered 플래그는 매 세션 시작 시 초기화
+        parsedPlaces.forEach(place => (place.isEntered = false));
+        console.log('localStorage에서 userPlaces 초기 로딩 완료:', parsedPlaces);
+        return parsedPlaces;
+      } catch (e) {
+        console.error("localStorage userPlaces 파싱 실패:", e);
+      }
+    }
+    console.log('localStorage에 userPlaces 없음. 빈 배열로 초기화.');
+    return []; // localStorage에 없으면 빈 배열로 초기화
+  });
+
+
   const [appSettings, setAppSettings] = useState(() => {
     // localStorage에서 설정 불러오기 (초기값 설정)
     const storedSettings = localStorage.getItem('언제갈지도_appSettings');
@@ -119,6 +138,12 @@ function App() {
 
   // userPlaces가 변경될 때마다 localStorage에 저장 (useCallback으로 감싸지 않아도 됨)
   useEffect(() => {
+    // 💡 이제 userPlaces는 useState 초기화에서 로드되므로, 이 useEffect에서는 알림 권한만 요청합니다.
+    requestNotificationPermission();
+  }, []); // 컴포넌트 마운트 시 1회만 실행
+
+  // userPlaces가 변경될 때마다 localStorage에 저장 (이 로직은 그대로 유지, 잘 되어 있음)
+  useEffect(() => {
     // isEntered 플래그는 세션별로 초기화되므로 localStorage에는 저장하지 않음
     const placesToSave = userPlaces.map(
       ({ id, name, lat, lng, radius }) => ({ id, name, lat, lng, radius })
@@ -127,7 +152,7 @@ function App() {
     console.log('localStorage에 장소 저장됨 (userPlaces 변경):', userPlaces);
   }, [userPlaces]);
 
-  // appSettings가 변경될 때마다 localStorage에 저장 (useCallback으로 감싸지 않아도 됨)
+  // appSettings가 변경될 때마다 localStorage에 저장 (이 로직도 그대로 유지, 잘 되어 있음)
   useEffect(() => {
     localStorage.setItem('언제갈지도_appSettings', JSON.stringify(appSettings));
     console.log('localStorage에 설정 저장됨 (appSettings 변경):', appSettings);

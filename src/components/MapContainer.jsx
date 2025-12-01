@@ -24,7 +24,12 @@ function MapContainer({
   userPlacesLatestRef.current = userPlaces; 
 
   const appSettingsLatestRef = useRef(appSettings);
-  appSettingsLatestRef.current = appSettings; 
+  appSettingsLatestRef.current = appSettings;
+
+  const addPlaceRef = useRef(addPlace);
+  useEffect(() => {
+    addPlaceRef.current = addPlace; // addPlace prop이 바뀔 때마다 useRef 업데이트
+  }, [addPlace]);
 
   const getDistance = useCallback((lat1, lon1, lat2, lon2) => {
     const R = 6371e3;
@@ -168,10 +173,10 @@ function MapContainer({
                         if (status === window.kakao.maps.services.Status.OK) {
                             defaultName = result[0].road_address?.address_name || result[0].address?.address_name || "새로운 장소";
                         }
-                        addPlace(latlng, defaultName);
+                        addPlaceRef.current(latlng, defaultName); // 💡 addPlaceRef.current()로 최신 addPlace 호출
                     });
                 } else {
-                    addPlace(latlng, defaultName);
+                    addPlaceRef.current(latlng, defaultName); // 💡 addPlaceRef.current()로 최신 addPlace 호출
                 }
             }, {
                 location: latlng,
@@ -251,7 +256,7 @@ function MapContainer({
     };
   // 💡 [수정] 의존성 배열에서 isKakaoMapsSdkLoaded, mapDivRef 제거 (초기화는 load 콜백 내에서 이루어지기 때문)
   //          isMapInitialized가 아닌 mapRef.current의 상태를 watch해서 초기화를 한 번만 진행
-  }, [mapDivRef, mapRef, isMapInitialized, closeAllModals, addPlace, getDistance, myLocationOverlayRef, showNotification, markerClustererRef, currentRadiusCircleRef, currentNameOverlayRef, userPlacesLatestRef, appSettingsLatestRef]);
+  }, [mapDivRef, mapRef, isMapInitialized, closeAllModals, getDistance, myLocationOverlayRef, showNotification, markerClustererRef, currentRadiusCircleRef, currentNameOverlayRef, userPlacesLatestRef, appSettingsLatestRef]);
 
 
   // ⭐️ userPlaces 변경 시 마커 및 클러스터 다시 그리기 ⭐️

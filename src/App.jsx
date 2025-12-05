@@ -1,6 +1,6 @@
 // src/App.jsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import './App.css'; // 기존 index.css 내용을 App.css로 옮겼다고 가정
+import './App.css';
 
 import MapContainer from './components/MapContainer';
 import Header from './components/Header';
@@ -8,9 +8,11 @@ import FloatingButtons from './components/FloatingButtons';
 import PlaceListModal from './components/modals/PlaceListModal';
 import SearchModal from './components/modals/SearchModal';
 import SettingsModal from './components/modals/SettingsModal';
+import RecommendationModal from './components/modals/RecommendationModal'; 
+
 
 // 전역 헬퍼 함수들은 여기에 모아둘게.
-// 나중에는 별도의 유틸리티 파일 (src/utils/helpers.js 등)로 분리할 수 있어.
+// 나중에는 별도의 유틸리티 파일 (src/utils/helpers.js 등)으로 분리할 수 있어.
 
 /**
  * 고유 ID를 생성합니다.
@@ -30,7 +32,7 @@ function requestNotificationPermission() {
         console.log('🔔 알림 권한이 허용되었습니다.');
       } else if (permission === 'denied') {
         console.warn('🔕 알림 권한이 영구적으로 거부되었습니다. 알림을 받을 수 없습니다.');
-      } else {
+      } else { // 'default' 또는 'prompt' 상태 (권한이 아직 결정되지 않음)
         console.warn('🔕 알림 권한이 아직 허용되지 않았습니다.');
       }
     });
@@ -45,27 +47,124 @@ function requestNotificationPermission() {
  * @param {string} body - 알림 내용
  */
 function showNotification(title, body) {
-  if ('Notification' in window && Notification.permission === 'granted') {
-    // React 환경에서는 public 폴더의 에셋을 참조할 때는 절대 경로 '/'를 사용한다.
-    // 또는 import해서 사용하는 방법도 있음. 지금은 public에 logo5.svg가 있다고 가정.
-    new Notification(title, { body: body, icon: '/logo5.svg' }); // public 폴더에 있다고 가정
-  } else if (Notification.permission !== 'denied') {
-    console.warn('알림 권한이 없어서 알림을 보낼 수 없습니다. 권한을 먼저 요청합니다.');
+  // 💡 이 로그 확인 (App.jsx의 showNotification 함수 호출 시점)
+  console.log(`🔔 showNotification 호출됨! 제목: "${title}", 내용: "${body}"`); 
+  if ('Notification' in window) {
+    if (Notification.permission === 'granted') {
+      new Notification(title, { body: body, icon: '/logo5.svg' });
+    } else if (Notification.permission === 'denied') {
+      console.warn('알림 권한이 "거부됨" 상태입니다. 브라우저 설정에서 변경해야 합니다.');
+    } else { // 'default' 또는 'prompt' 상태
+      console.warn('알림 권한이 아직 허용되지 않았습니다. 권한을 먼저 요청합니다.');
+    }
+  } else {
+    console.warn('⚠️ 이 브라우저는 웹 알림을 지원하지 않습니다.');
   }
+}
+
+// 💡 MapContainer에 있던 getDistance 함수를 App.jsx로 옮겨왔습니다.
+/**
+ * 두 지점 간의 거리를 미터 단위로 계산합니다 (하버사인 공식).
+ * @param {number} lat1 - 첫 번째 지점의 위도
+ * @param {number} lon1 - 첫 번째 지점의 경도
+ * @param {number} lat2 - 두 번째 지점의 위도
+ * @param {number} lon2 - 두 번째 지점의 경도
+ * @returns {number} 두 지점 간의 거리 (미터)
+ */
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371e3; // 지구 반경 (미터)
+  const φ1 = lat1 * Math.PI / 180; // 위도를 라디안으로 변환
+  const φ2 = lat2 * Math.PI / 180; // 위도를 라디안으로 변환
+  const Δφ = (lat2 - lat1) * Math.PI / 180; // 위도 차이를 라디안으로 변환
+  const Δλ = (lon2 - lon1) * Math.PI / 180; // 경도 차이를 라디안으로 변환
+
+  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // 미터 단위 거리
+}
+
+// 💡 새로운 함수: 1km 이내에 있는 장소 3개 그룹 찾기 (RecommendationModal 관련)
+/**
+ * userPlaces에서 서로 maxDistance 이내에 있는 장소 그룹(최소 minGroupSize 이상)을 찾습니다.
+ * @param {Array<Object>} places - 사용자 장소 목록
+ * @param {number} minGroupSize - 최소 그룹 크기 (기본값 3)
+ * @param {number} maxDistance - 최대 거리 (미터 단위, 기본값 1000m = 1km)
+ * @returns {Array<Array<Object>>} 찾은 장소 그룹들의 배열
+ */
+function findNearbyGroups(places, minGroupSize = 3, maxDistance = 1000) {
+  const groups = [];
+
+  // 최소 그룹 크기보다 장소가 적으면 그룹을 만들 수 없음
+  if (places.length < minGroupSize) {
+    return groups;
+  }
+
+  // 조합을 생성하는 재귀 함수 (깊이 우선 탐색)
+  function generateCombinations(startIdx, currentCombination) {
+    if (currentCombination.length === minGroupSize) {
+      // minGroupSize 만큼 조합이 완성되면, 해당 조합 내의 모든 장소들이 서로 maxDistance 이내인지 확인
+      let allNearby = true;
+      for (let i = 0; i < minGroupSize; i++) {
+        for (let j = i + 1; j < minGroupSize; j++) {
+          const p1 = currentCombination[i];
+          const p2 = currentCombination[j];
+          // getDistance 함수를 사용
+          if (getDistance(p1.lat, p1.lng, p2.lat, p2.lng) > maxDistance) {
+            allNearby = false; // 하나라도 거리가 멀면 실패
+            break;
+          }
+        }
+        if (!allNearby) break;
+      }
+
+      if (allNearby) {
+        groups.push(currentCombination); // 조건을 만족하는 그룹 추가
+      }
+      return;
+    }
+
+    if (startIdx >= places.length) {
+      return;
+    }
+
+    // 현재 장소를 조합에 포함시키는 경우
+    generateCombinations(startIdx + 1, [...currentCombination, places[startIdx]]);
+    // 현재 장소를 조합에 포함시키지 않는 경우
+    generateCombinations(startIdx + 1, currentCombination);
+  }
+
+  generateCombinations(0, []); // 0번째 인덱스부터 시작, 빈 조합
+
+  // 중복 그룹 방지 (같은 장소들로 구성된 그룹이지만 순서만 다른 경우)
+  const uniqueGroups = [];
+  const uniqueGroupKeys = new Set();
+
+  groups.forEach(group => {
+    // 장소 ID로 정렬하여 고유한 키 생성
+    const key = group.map(p => p.id).sort().join('-');
+    if (!uniqueGroupKeys.has(key)) {
+      uniqueGroups.push(group);
+      uniqueGroupKeys.add(key);
+    }
+  });
+
+  return uniqueGroups;
 }
 
 
 function App() {
-  // 📍 앱의 핵심 상태 관리
-  // 💡 userPlaces 초기값 로딩 방식을 appSettings와 동일하게 개선
   const [userPlaces, setUserPlaces] = useState(() => {
+    // localStorage에서 userPlaces 초기 로딩 
     console.log('localStorage에서 userPlaces 초기 로딩 시도...');
     const storedPlaces = localStorage.getItem('언제갈지도_places');
     if (storedPlaces) {
       try {
         const parsedPlaces = JSON.parse(storedPlaces);
-        // isEntered 플래그는 매 세션 시작 시 초기화
-        parsedPlaces.forEach(place => (place.isEntered = false));
+        // isEntered 상태는 MapContainer 내부에서만 관리되므로, 여기서는 초기화 시 추가하지 않습니다.
+        parsedPlaces.forEach(place => (place.isEntered = false)); // 이전 로직 유지를 위해
         console.log('localStorage에서 userPlaces 초기 로딩 완료:', parsedPlaces);
         return parsedPlaces;
       } catch (e) {
@@ -73,17 +172,14 @@ function App() {
       }
     }
     console.log('localStorage에 userPlaces 없음. 빈 배열로 초기화.');
-    return []; // localStorage에 없으면 빈 배열로 초기화
+    return [];
   });
 
-
   const [appSettings, setAppSettings] = useState(() => {
-    // localStorage에서 설정 불러오기 (초기값 설정)
     const storedSettings = localStorage.getItem('언제갈지도_appSettings');
     if (storedSettings) {
       try {
         const parsedSettings = JSON.parse(storedSettings);
-        // 새로운 설정이 추가되어도 오류 없이 불러오도록 기본값과 병합
         return {
           defaultRadius: 1000,
           notifyOnEnter: true,
@@ -94,7 +190,6 @@ function App() {
         console.error("localStorage 설정 파싱 실패:", e);
       }
     }
-    // 기본값
     return {
       defaultRadius: 1000,
       notifyOnEnter: true,
@@ -102,57 +197,37 @@ function App() {
     };
   });
 
-  // 📍 모달 열림/닫힘 상태 관리
+  // 💡 모달 열림/닫힘 상태 추가
   const [isPlaceModalOpen, setIsPlaceModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isRecommendationModalOpen, setIsRecommendationModalOpen] = useState(false); // 💡 추천 모달 상태 추가
+  const [recommendedGroups, setRecommendedGroups] = useState([]); // 💡 추천 그룹 목록 상태 추가
 
-  // 📍 Kakao Maps API 객체들을 위한 Ref들 (MapContainer로 전달, MapContainer에서 값 할당)
-  // App.jsx에서 MapContainer의 특정 함수를 호출하거나 상태를 동기화해야 할 때 사용
-  const mapRef = useRef(null); // MapContainer에서 생성된 지도 인스턴스
-  const myLocationOverlayRef = useRef(null); // 내 위치 오버레이 ref
-  const currentRadiusCircleRef = useRef(null); // 현재 표시된 반경 원 ref
-  const currentNameOverlayRef = useRef(null); // 마커 클릭 시 이름 오버레이 ref
-  const markerClustererRef = useRef(null); // 마커 클러스터러 ref
+  // 📍 Kakao Maps API 객체들을 위한 Ref들 (MapContainer로 전달)
+  const mapRef = useRef(null);
+  const myLocationOverlayRef = useRef(null);
+  const currentRadiusCircleRef = useRef(null);
+  const currentNameOverlayRef = useRef(null);
+  const markerClustererRef = useRef(null);
 
 
-  // ⭐️ useEffect: 컴포넌트 마운트 시 초기화 및 localStorage 동기화 ⭐️
+  // ⭐️ useEffect: 컴포넌트 마운트 시 초기화 (알림 권한 요청) ⭐️
   useEffect(() => {
-    // 페이지 로드 시 localStorage에서 장소 목록 불러오기
-    const storedPlaces = localStorage.getItem('언제갈지도_places');
-    if (storedPlaces) {
-      try {
-        const parsedPlaces = JSON.parse(storedPlaces);
-        // isEntered 플래그는 매 세션 시작 시 초기화
-        parsedPlaces.forEach(place => (place.isEntered = false));
-        setUserPlaces(parsedPlaces);
-        console.log('localStorage에서 불러온 장소:', parsedPlaces);
-      } catch (e) {
-        console.error("localStorage 장소 파싱 실패:", e);
-      }
-    }
-
-    // 페이지 로드 시 알림 권한 요청 (최초 1회)
     requestNotificationPermission();
-  }, []); // 컴포넌트 마운트 시 1회만 실행
+  }, []);
 
-  // userPlaces가 변경될 때마다 localStorage에 저장 (useCallback으로 감싸지 않아도 됨)
+  // userPlaces가 변경될 때마다 localStorage에 저장
   useEffect(() => {
-    // 💡 이제 userPlaces는 useState 초기화에서 로드되므로, 이 useEffect에서는 알림 권한만 요청합니다.
-    requestNotificationPermission();
-  }, []); // 컴포넌트 마운트 시 1회만 실행
-
-  // userPlaces가 변경될 때마다 localStorage에 저장 (이 로직은 그대로 유지, 잘 되어 있음)
-  useEffect(() => {
-    // isEntered 플래그는 세션별로 초기화되므로 localStorage에는 저장하지 않음
     const placesToSave = userPlaces.map(
-      ({ id, name, lat, lng, radius }) => ({ id, name, lat, lng, radius })
+      // isEntered는 localStorage에 저장하지 않고, MapContainer에서 내부적으로만 관리
+      ({ id, name, lat, lng, radius }) => ({ id, name, lat, lng, radius }) 
     );
     localStorage.setItem('언제갈지도_places', JSON.stringify(placesToSave));
     console.log('localStorage에 장소 저장됨 (userPlaces 변경):', userPlaces);
   }, [userPlaces]);
 
-  // appSettings가 변경될 때마다 localStorage에 저장 (이 로직도 그대로 유지, 잘 되어 있음)
+  // appSettings가 변경될 때마다 localStorage에 저장
   useEffect(() => {
     localStorage.setItem('언제갈지도_appSettings', JSON.stringify(appSettings));
     console.log('localStorage에 설정 저장됨 (appSettings 변경):', appSettings);
@@ -164,12 +239,7 @@ function App() {
     setIsPlaceModalOpen(false);
     setIsSearchModalOpen(false);
     setIsSettingsModalOpen(false);
-    // 지도에 있는 CustomOverlay나 반경 원을 닫는 로직
-    // App.jsx는 UI 닫기 기능만 수행하고, 지도 관련 객체 제거는 MapContainer에 위임.
-    // MapContainer의 useEffect에서 지도 클릭 이벤트 시 이 함수를 호출할 때,
-    // MapContainer 내부에서 currentNameOverlayRef.current 등 제거 로직을 직접 수행해야 함.
-    // 하지만 각 모달에서 onOpen/onClose 시 오버레이를 지우고 MapContainer가 UserPlaces 변경시 맵을 리렌더링하므로
-    // 이 부분은 MapContainer에서 관리하도록 놔둔다.
+    setIsRecommendationModalOpen(false); // 💡 추천 모달 닫기 추가
   }, []);
 
   // 📍 장소 추가 로직 (MapContainer에서 호출됨)
@@ -194,36 +264,51 @@ function App() {
       lat: latlng.getLat(),
       lng: latlng.getLng(),
       radius: radius,
-      isEntered: false,
+      // isEntered는 MapContainer 내부에서만 관리
     };
 
     setUserPlaces((prevPlaces) => [...prevPlaces, newPlace]); // 상태 업데이트
     console.log(`새 장소 등록 및 저장 완료: ${placeName}, 반경: ${radius}m`);
-    return newPlace; // 추가된 장소 반환 (MapContainer에서 필요할 수 있음)
-  }, [appSettings.defaultRadius]); // defaultRadius 변경 시 함수 재생성
+    return newPlace;
+  }, [appSettings.defaultRadius]);
 
   // 📍 장소 삭제 로직 (Modal 등에서 호출됨)
   const deletePlace = useCallback((idToDelete) => {
     setUserPlaces((prevPlaces) => {
       const newPlaces = prevPlaces.filter((place) => place.id !== idToDelete);
-      // 만약 현재 지도에 표시된 CustomOverlay나 Circle이 삭제된 장소였다면 제거 로직 필요
-      if (currentNameOverlayRef.current && currentNameOverlayRef.current._placeId === idToDelete) { // _placeId는 CustomOverlay에 내부적으로 설정했다고 가정
+      // 현재 지도에 표시된 오버레이가 삭제될 장소의 것이라면 지도에서 제거
+      if (currentNameOverlayRef.current && currentNameOverlayRef.current._placeId === idToDelete) {
         currentNameOverlayRef.current.setMap(null);
         currentNameOverlayRef.current = null;
       }
-      if (currentRadiusCircleRef.current && currentRadiusCircleRef.current._placeId === idToDelete) { // _placeId는 CustomOverlay에 내부적으로 설정했다고 가정
+      if (currentRadiusCircleRef.current && currentRadiusCircleRef.current._placeId === idToDelete) {
          currentRadiusCircleRef.current.setMap(null);
          currentRadiusCircleRef.current = null;
       }
       return newPlaces;
     });
-    // 마커, 클러스터 등 지도 업데이트는 userPlaces 변경에 따라 MapContainer의 useEffect에서 처리됨
   }, [currentNameOverlayRef, currentRadiusCircleRef]);
+
+
+  // 💡 새로운 함수: 주변 장소 추천 시작 (FloatingButtons에서 호출될 예정)
+  const startRecommendation = useCallback(() => {
+    closeAllModals(); // 다른 모든 모달 닫기
+    
+    // findNearbyGroups 함수를 사용
+    const groups = findNearbyGroups(userPlaces, 3, 1000); // 최소 3개, 1km 이내
+    console.log("추천 그룹 발견:", groups);
+    
+    if (groups.length > 0) {
+      setRecommendedGroups(groups); // 찾은 그룹들을 상태에 저장
+      setIsRecommendationModalOpen(true); // 추천 모달 열기
+    } else {
+      alert("서로 1km 이내에 있는 3개 이상의 장소 그룹을 찾을 수 없습니다.");
+    }
+  }, [userPlaces, closeAllModals]);
 
 
   return (
     <div className="App">
-      {/* ⭐️ 1. Header 컴포넌트 렌더링 ⭐️ */}
       <Header
         openPlaceModal={() => setIsPlaceModalOpen(true)}
         openSearchModal={() => setIsSearchModalOpen(true)}
@@ -231,61 +316,65 @@ function App() {
         closeAllModals={closeAllModals}
       />
 
-      {/* ⭐️ 2. FloatingButtons 컴포넌트 렌더링 ⭐️ */}
       <FloatingButtons
         mapRef={mapRef}
         myLocationOverlayRef={myLocationOverlayRef}
         closeAllModals={closeAllModals}
+        startRecommendation={startRecommendation} // 💡 추천 기능 시작 함수 전달
       />
 
       <main>
-        {/* ⭐️ 3. MapContainer 컴포넌트 렌더링 ⭐️ */}
         <MapContainer
-          mapRef={mapRef} // MapContainer에서 생성된 지도 인스턴스를 App에서 참조할 수 있도록
+          mapRef={mapRef}
           myLocationOverlayRef={myLocationOverlayRef}
           currentRadiusCircleRef={currentRadiusCircleRef}
           currentNameOverlayRef={currentNameOverlayRef}
           markerClustererRef={markerClustererRef}
-          userPlaces={userPlaces} // 장소 목록 전달
-          appSettings={appSettings} // 설정값 전달
-          addPlace={addPlace} // 장소 추가 함수 전달
-          showNotification={showNotification} // 알림 함수 전달
-          closeAllModals={closeAllModals} // 지도 클릭 시 모달 닫기용
-          // 이곳에서 mapCenterRef는 MapContainer 내부에서만 관리 (map.setCenter)되므로 props로 넘기지 않음
+          userPlaces={userPlaces}
+          appSettings={appSettings}
+          addPlace={addPlace}
+          showNotification={showNotification}
+          closeAllModals={closeAllModals}
         />
       </main>
 
-      {/* ⭐️ 4. PlaceListModal 컴포넌트 렌더링 ⭐️ */}
       <PlaceListModal
         isOpen={isPlaceModalOpen}
-        onClose={() => setIsPlaceModalOpen(false)} // 모달 닫기 함수 전달
+        onClose={() => setIsPlaceModalOpen(false)}
         userPlaces={userPlaces}
-        deletePlace={deletePlace} // 장소 삭제 함수 전달
+        deletePlace={deletePlace}
         mapRef={mapRef}
         currentRadiusCircleRef={currentRadiusCircleRef}
         currentNameOverlayRef={currentNameOverlayRef}
       />
 
-      {/* ⭐️ 5. SearchModal 컴포넌트 렌더링 ⭐️ */}
       <SearchModal
         isOpen={isSearchModalOpen}
-        onClose={() => setIsSearchModalOpen(false)} // 모달 닫기 함수 전달
+        onClose={() => setIsSearchModalOpen(false)}
         userPlaces={userPlaces}
-        deletePlace={deletePlace} // 장소 삭제 함수 전달
+        deletePlace={deletePlace}
         mapRef={mapRef}
         currentRadiusCircleRef={currentRadiusCircleRef}
         currentNameOverlayRef={currentNameOverlayRef}
       />
 
-      {/* ⭐️ 6. SettingsModal 컴포넌트 렌더링 ⭐️ */}
       <SettingsModal
         isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)} // 모달 닫기 함수 전달
-        appSettings={appSettings} // 설정 객체 전달
-        setAppSettings={setAppSettings} // 설정 업데이트 함수 전달
+        onClose={() => setIsSettingsModalOpen(false)}
+        appSettings={appSettings}
+        setAppSettings={setAppSettings}
+      />
+      
+      {/* 💡 새로운 모달: 추천 장소 그룹을 보여줍니다 */}
+      <RecommendationModal
+        isOpen={isRecommendationModalOpen}
+        onClose={() => setIsRecommendationModalOpen(false)}
+        recommendedGroups={recommendedGroups} // 추천 그룹 목록 전달
+        mapRef={mapRef}
+        currentRadiusCircleRef={currentRadiusCircleRef}
+        currentNameOverlayRef={currentNameOverlayRef}
       />
 
-      {/* ⭐️ 7. Footer 렌더링 ⭐️ */}
       <footer>
         <p>© 2025 언제갈지도 — Created by 멍순이</p>
       </footer>

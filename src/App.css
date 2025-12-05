@@ -56,7 +56,7 @@ header h1 {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, calc(-50% - 5px));
+  transform: translate(-50%, calc(-50% - 10px));
   margin: 0;
   padding: 0;
   white-space: nowrap;
